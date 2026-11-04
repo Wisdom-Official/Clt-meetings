@@ -5,8 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calicut North - Wisdom Students Secretariat Portal</title>
-    <!-- Web App Manifest -->
+    <!-- Web App Manifest & Mobile PWA Meta -->
     <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Wisdom North">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="icon" type="image/png" href="logo.png">
     <meta name="theme-color" content="#0369a1">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -47,7 +53,7 @@
             <!-- Brand Logo & Context Title -->
             <div class="flex items-center space-x-3 cursor-pointer group min-w-0" onclick="navigateTo('home')">
                 <div class="p-1 rounded-xl bg-slate-50 border border-slate-100 group-hover:border-sky-200 transition-all shrink-0">
-                    <img src="studentlogo.jpg" alt="WISDOM Students Logo" class="h-8 sm:h-9 md:h-10 w-auto object-contain rounded-lg" onerror="this.onerror=null; this.src='https://placehold.co/180x50/0f172a/ffffff?text=WISDOM+students';">
+                    <img src="logo.png" alt="WISDOM Students Logo" class="h-8 sm:h-9 md:h-10 w-auto object-contain rounded-lg" onerror="this.onerror=null; this.src='https://placehold.co/180x50/0f172a/ffffff?text=WISDOM+students';">
                 </div>
                 <div class="border-l border-slate-200 pl-2.5 sm:pl-3 truncate">
                     <h1 class="text-xs sm:text-sm font-extrabold text-slate-900 uppercase tracking-wider truncate group-hover:text-sky-600 transition-colors">Calicut North</h1>
@@ -593,13 +599,16 @@
         let currentZoomScale = 1;
 
         let deferredPrompt = null;
+        let swRegistration = null;
 
         // Register Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Registration error:', err));
+            navigator.serviceWorker.register('sw.js').then((reg) => {
+                swRegistration = reg;
+            }).catch(err => console.log('SW Registration error:', err));
         }
 
-        // PWA Prompt Listener
+        // Prompt PWA Installation
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
@@ -616,9 +625,11 @@
             }
         };
 
-        // Request Push Notification Permission
-        if ('Notification' in window && Notification.permission !== 'granted') {
-            Notification.requestPermission();
+        // Automatically Request Notification Permissions
+        function requestNotificationPermissions() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
         }
 
         function saveLocalState() {
@@ -686,19 +697,28 @@
 
         function triggerAnnouncementAlert(ann) {
             if (!ann) return;
-            // Play High Volume Sound
+            // High Sound Alert Audio
             try {
                 alertAudio.currentTime = 0;
                 alertAudio.play().catch(e => console.log("Audio play prevented:", e));
             } catch(e) {}
 
-            // Send System Notification
+            // Send Push Notification via Service Worker if registered, or Fallback Native Notification
             if ('Notification' in window && Notification.permission === 'granted') {
-                new Notification(ann.title, {
-                    body: `Date: ${ann.date} | Venue: ${ann.location}`,
-                    icon: 'studentlogo.jpg',
-                    vibrate: [200, 100, 200]
-                });
+                if (swRegistration) {
+                    swRegistration.showNotification(ann.title, {
+                        body: `Date: ${ann.date} | Venue: ${ann.location}\n${ann.details || ''}`,
+                        icon: 'logo.png',
+                        badge: 'logo.png',
+                        vibrate: [300, 100, 300, 100, 300]
+                    });
+                } else {
+                    new Notification(ann.title, {
+                        body: `Date: ${ann.date} | Venue: ${ann.location}`,
+                        icon: 'logo.png',
+                        vibrate: [300, 100, 300]
+                    });
+                }
             }
         }
 
@@ -876,6 +896,7 @@
         };
 
         window.onload = function() {
+            requestNotificationPermissions();
             renderAnnouncementBanner();
             renderMandalams();
             document.getElementById('meetingDate').value = new Date().toISOString().split('T')[0];
