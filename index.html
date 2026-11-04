@@ -1,0 +1,1396 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calicut North - Wisdom Students Secretariat Portal</title>
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0369a1">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff', 100: '#e0effe', 500: '#0284c7', 600: '#0369a1', 700: '#0c4a6e', 800: '#082f49', 900: '#0f172a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .att-btn { transition: all 0.2s ease; }
+        .att-btn.active-present { background-color: #10b981; color: white; border-color: #059669; }
+        .att-btn.active-late { background-color: #f59e0b; color: white; border-color: #d97706; }
+        .att-btn.active-leave { background-color: #ef4444; color: white; border-color: #dc2626; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col pb-20 md:pb-0">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 shadow-sm transition-all">
+        <div class="max-w-5xl mx-auto px-4 py-2.5 sm:py-3 flex items-center justify-between gap-3">
+            
+            <!-- Brand Logo & Context Title -->
+            <div class="flex items-center space-x-3 cursor-pointer group min-w-0" onclick="navigateTo('home')">
+                <div class="p-1 rounded-xl bg-slate-50 border border-slate-100 group-hover:border-sky-200 transition-all shrink-0">
+                    <img src="studentlogo.jpg" alt="WISDOM Students Logo" class="h-8 sm:h-9 md:h-10 w-auto object-contain rounded-lg" onerror="this.onerror=null; this.src='https://placehold.co/180x50/0f172a/ffffff?text=WISDOM+students';">
+                </div>
+                <div class="border-l border-slate-200 pl-2.5 sm:pl-3 truncate">
+                    <h1 class="text-xs sm:text-sm font-extrabold text-slate-900 uppercase tracking-wider truncate group-hover:text-sky-600 transition-colors">Calicut North</h1>
+                    <p class="text-[10px] sm:text-xs text-slate-500 font-medium truncate">Secretariat Management</p>
+                </div>
+            </div>
+
+            <!-- Sync Indicator & App Install Action -->
+            <div class="flex items-center space-x-2 shrink-0">
+                <div id="syncBadge" class="flex items-center text-[10px] sm:text-xs bg-amber-50 text-amber-800 px-2.5 sm:px-3 py-1 rounded-full font-semibold border border-amber-200 shadow-sm transition-all">
+                    <i class="fa-solid fa-wifi text-amber-500 mr-1.5 text-[10px] sm:text-xs" id="syncIcon"></i>
+                    <span id="syncStatus">Offline Mode</span>
+                </div>
+
+                <button id="pwaInstallBtn" onclick="triggerPWAInstall()" class="hidden bg-sky-600 hover:bg-sky-700 text-white px-3 py-1 rounded-full text-xs font-bold transition-all flex items-center gap-1 shadow-sm">
+                    <i class="fa-solid fa-download"></i>
+                    <span class="hidden sm:inline">Install App</span>
+                </button>
+
+                <div id="headerBadge" class="hidden sm:flex items-center text-xs bg-sky-50 text-sky-800 px-3 py-1 rounded-full font-medium border border-sky-200/80 shadow-sm">
+                    <i class="fa-solid font-bold text-sky-600 mr-1.5 fa-sitemap"></i>
+                    <span id="headerContextText">District Executive</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-5xl mx-auto px-4 py-6 flex-1 w-full">
+
+        <!-- DYNAMIC BROADCAST ANNOUNCEMENT BANNER -->
+        <div id="announcementBanner" class="hidden mb-6 bg-gradient-to-r from-sky-600 via-sky-700 to-indigo-800 text-white rounded-2xl p-5 shadow-xl relative overflow-hidden border border-sky-400/30">
+            <div class="flex items-start justify-between gap-4 relative z-10">
+                <div class="space-y-1.5">
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-amber-400 text-slate-900 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1">
+                            <i class="fa-solid fa-bell animate-bounce"></i> Upcoming Event Announcement
+                        </span>
+                    </div>
+                    <h2 id="annTitle" class="text-lg sm:text-xl font-bold tracking-tight"></h2>
+                    <div class="flex flex-wrap items-center gap-4 text-xs font-medium text-sky-100 pt-1">
+                        <span class="flex items-center gap-1.5 bg-white/10 px-2.5 py-1 rounded-lg">
+                            <i class="fa-solid fa-calendar-days text-amber-300"></i>
+                            <span id="annDate"></span>
+                        </span>
+                        <span class="flex items-center gap-1.5 bg-white/10 px-2.5 py-1 rounded-lg">
+                            <i class="fa-solid fa-location-dot text-rose-300"></i>
+                            <span id="annLocation"></span>
+                        </span>
+                    </div>
+                    <p id="annDetails" class="text-xs text-sky-100/90 leading-relaxed pt-1 max-w-2xl"></p>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-amber-300 text-xl shrink-0 border border-white/20 shadow-inner">
+                    <i class="fa-solid fa-bullhorn"></i>
+                </div>
+            </div>
+            <div class="absolute -right-6 -bottom-10 opacity-10 text-9xl pointer-events-none">
+                <i class="fa-solid fa-calendar-check"></i>
+            </div>
+        </div>
+
+        <!-- BREADCRUMB NAVIGATION -->
+        <nav id="breadcrumb" class="flex items-center space-x-2 text-xs text-slate-500 mb-6 bg-white p-3 rounded-xl border border-slate-200/80 shadow-sm overflow-x-auto">
+            <button onclick="navigateTo('home')" class="hover:text-sky-600 font-medium flex items-center gap-1">
+                <i class="fa-solid fa-house text-slate-400"></i> Home
+            </button>
+            <span class="text-slate-300 hidden" id="bc1-sep">/</span>
+            <button id="bc-mandalam" onclick="switchView('mandalam')" class="font-medium hover:text-sky-600 text-slate-800 hidden">Zone</button>
+            <span class="text-slate-300 hidden" id="bc2-sep">/</span>
+            <span id="bc-unit" class="font-semibold text-sky-600 hidden">Unit</span>
+        </nav>
+
+        <!-- VIEW 1: MANDALAM LIST (HOME) -->
+        <section id="view-home" class="space-y-6">
+            <div class="bg-gradient-to-r from-sky-900 via-slate-900 to-sky-950 text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
+                <div class="relative z-10 max-w-xl">
+                    <span class="bg-sky-500/20 text-sky-300 border border-sky-400/30 text-[11px] font-semibold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Calicut North District</span>
+                    <h2 class="text-2xl font-bold mt-2">7 Zone Secretariats</h2>
+                    <p class="text-slate-300 text-xs mt-1 leading-relaxed">Select a Zone to manage Secretariat & Executive members, record meeting details, upload minutes photos, and synchronize data seamlessly online or offline.</p>
+                </div>
+                <div class="absolute -right-6 -bottom-10 opacity-10 text-9xl">
+                    <i class="fa-solid fa-building-columns"></i>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3 px-1 flex items-center justify-between">
+                    <span>Zones</span>
+                    <span class="text-xs font-normal text-slate-500">7 Total</span>
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="mandalamGrid">
+                    <!-- Dynamic Zone Cards -->
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 2: UNIT LIST & MANDALAM DASHBOARD -->
+        <section id="view-mandalam" class="space-y-6 hidden">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-sky-600 bg-sky-50 px-2 py-0.5 rounded uppercase">Zone</span>
+                        <h2 class="text-xl font-bold text-slate-800" id="mandalamTitle">Balussery</h2>
+                    </div>
+                    <p class="text-slate-500 text-xs mt-1">Manage Zone Executives and Unit level meeting reports</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="promptAuth('mandalam', () => openSecretariatModal('mandalam'))" class="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow transition-all">
+                        <i class="fa-solid fa-user-plus text-sky-400"></i>
+                        <span>Zone Secretariat</span>
+                    </button>
+                    <button onclick="promptAuth('mandalam', () => openMeetingModal('mandalam'))" class="bg-sky-600 hover:bg-sky-700 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow transition-all">
+                        <i class="fa-solid fa-calendar-plus"></i>
+                        <span>New Zone Meeting</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Unit List -->
+            <div>
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3 px-1 flex items-center justify-between">
+                    <span>Unit List</span>
+                    <span class="text-xs font-normal text-slate-500" id="unitCountTag">0 Units</span>
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="unitGrid">
+                    <!-- Dynamic Units -->
+                </div>
+            </div>
+
+            <!-- Zone Secretariat Members -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-users text-sky-600"></i>
+                        <span>Zone Secretariat & Executive Members</span>
+                    </h3>
+                    <button onclick="promptAuth('mandalam', () => openSecretariatModal('mandalam'))" class="text-xs text-sky-600 font-semibold hover:underline flex items-center gap-1">
+                        <i class="fa-solid fa-plus-circle"></i> Add Member
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="mandalamMemberList">
+                    <!-- Dynamic Members -->
+                </div>
+            </div>
+
+            <!-- PASSWORD PROTECTED ZONE MEETINGS LOG SECTION -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all">
+                <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-list text-sky-600"></i>
+                        <span>Zone Level Meetings</span>
+                    </h3>
+                    <button type="button" id="mandalamMeetingLockBadge" onclick="toggleMeetingsLock()" class="text-[10px] font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200 flex items-center gap-1 hover:opacity-80 transition-all cursor-pointer">
+                        <i class="fa-solid fa-lock"></i> Protected
+                    </button>
+                </div>
+
+                <!-- Protected Overlay / Password Lock Screen for Zone Meetings -->
+                <div id="mandalamMeetingsLockOverlay" class="p-8 text-center bg-slate-50/80 border-b border-slate-100 flex flex-col items-center justify-center">
+                    <div class="w-12 h-12 bg-sky-100 text-sky-600 rounded-2xl flex items-center justify-center mb-3 text-xl shadow-sm">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-slate-800">Protected Section</h4>
+                    <p class="text-xs text-slate-500 max-w-xs mt-1 mb-4">Meeting log details are restricted. Enter master password to view details.</p>
+                    <form onsubmit="verifyMeetingsPassword(event, 'mandalam')" class="flex flex-col sm:flex-row items-center gap-2 w-full max-w-xs">
+                        <input type="password" id="mandalamLogPassInput" placeholder="Enter Access Password" required class="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 outline-none text-center sm:text-left">
+                        <button type="submit" class="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-semibold shrink-0 shadow transition-all">
+                            Unlock
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Actual Protected Content Area -->
+                <div id="mandalamMeetingsContent" class="divide-y divide-slate-100 hidden">
+                    <div class="p-6 text-center text-slate-400 text-xs">No meetings logged for this Zone yet.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 3: UNIT DASHBOARD -->
+        <section id="view-unit" class="space-y-6 hidden">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-sky-600 bg-sky-50 px-2 py-0.5 rounded uppercase">Unit Dashboard</span>
+                        <h2 class="text-xl font-bold text-slate-800" id="unitTitle">Puthoor Vattam</h2>
+                    </div>
+                    <p class="text-slate-500 text-xs mt-1" id="unitSubtext">Under Zone Secretariat</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="promptAuth('unit', () => openSecretariatModal('unit'))" class="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow transition-all">
+                        <i class="fa-solid fa-user-plus text-sky-400"></i>
+                        <span>Add Unit Executive</span>
+                    </button>
+                    <button onclick="promptAuth('unit', () => openMeetingModal('unit'))" class="bg-sky-600 hover:bg-sky-700 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow transition-all">
+                        <i class="fa-solid fa-file-pen"></i>
+                        <span>Log Unit Meeting</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Members Card -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-users text-sky-600"></i>
+                        <span>Unit Secretariat & Executive Members</span>
+                    </h3>
+                    <button onclick="promptAuth('unit', () => openSecretariatModal('unit'))" class="text-xs text-sky-600 font-semibold hover:underline flex items-center gap-1">
+                        <i class="fa-solid fa-plus-circle"></i> Add Member
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="unitMemberList">
+                    <!-- Dynamic Members -->
+                </div>
+            </div>
+
+            <!-- PASSWORD PROTECTED UNIT MEETINGS HISTORY & MINUTES BOOK -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all">
+                <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-sky-600"></i>
+                        <span>Unit Meetings & Minutes Book</span>
+                    </h3>
+                    <button type="button" id="unitMeetingLockBadge" onclick="toggleMeetingsLock()" class="text-[10px] font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200 flex items-center gap-1 hover:opacity-80 transition-all cursor-pointer">
+                        <i class="fa-solid fa-lock"></i> Protected
+                    </button>
+                </div>
+
+                <!-- Protected Overlay / Password Lock Screen for Unit Meetings -->
+                <div id="unitMeetingsLockOverlay" class="p-8 text-center bg-slate-50/80 border-b border-slate-100 flex flex-col items-center justify-center">
+                    <div class="w-12 h-12 bg-sky-100 text-sky-600 rounded-2xl flex items-center justify-center mb-3 text-xl shadow-sm">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-slate-800">Protected Section</h4>
+                    <p class="text-xs text-slate-500 max-w-xs mt-1 mb-4">Meeting minutes & photos are locked. Enter password to unlock.</p>
+                    <form onsubmit="verifyMeetingsPassword(event, 'unit')" class="flex flex-col sm:flex-row items-center gap-2 w-full max-w-xs">
+                        <input type="password" id="unitLogPassInput" placeholder="Enter Access Password" required class="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 outline-none text-center sm:text-left">
+                        <button type="submit" class="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-semibold shrink-0 shadow transition-all">
+                            Unlock
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Actual Protected Content Area -->
+                <div id="unitMeetingsContent" class="divide-y divide-slate-100 hidden">
+                    <!-- Dynamic Unit Meetings -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FULL-SCREEN IMAGE PREVIEW & ZOOM MODAL -->
+    <div id="imageViewerModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex flex-col items-center justify-between p-4 hidden">
+        <div class="w-full max-w-5xl flex items-center justify-between text-white z-10 py-2">
+            <span id="imageViewerTitle" class="text-xs font-semibold tracking-wider text-slate-300">Image Preview</span>
+            <div class="flex items-center space-x-2">
+                <button type="button" onclick="zoomImage(0.25)" class="w-9 h-9 bg-slate-800 hover:bg-slate-700 text-white rounded-xl flex items-center justify-center transition-all shadow-lg" title="Zoom In">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                </button>
+                <button type="button" onclick="zoomImage(-0.25)" class="w-9 h-9 bg-slate-800 hover:bg-slate-700 text-white rounded-xl flex items-center justify-center transition-all shadow-lg" title="Zoom Out">
+                    <i class="fa-solid fa-magnifying-glass-minus"></i>
+                </button>
+                <button type="button" onclick="resetZoomImage()" class="w-9 h-9 bg-slate-800 hover:bg-slate-700 text-white rounded-xl flex items-center justify-center transition-all shadow-lg" title="Reset Zoom">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+                <button type="button" onclick="closeModal('imageViewerModal')" class="w-9 h-9 bg-rose-600 hover:bg-rose-700 text-white rounded-xl flex items-center justify-center transition-all shadow-lg ml-2" title="Close Preview">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-1 w-full flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing relative" onclick="if(event.target === this) closeModal('imageViewerModal')">
+            <img id="modalPreviewImage" src="" alt="Full Preview" class="max-h-[82vh] max-w-full object-contain transition-transform duration-200 select-none shadow-2xl rounded-lg" style="transform: scale(1);">
+        </div>
+
+        <div class="text-slate-400 text-[11px] pb-2 z-10 flex items-center gap-2">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>Use buttons or scroll to zoom. Tap outside or Back button to close.</span>
+        </div>
+    </div>
+
+    <!-- AUTHENTICATION PASSCODE MODAL -->
+    <div id="authModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-slate-100">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-sky-50 text-sky-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h3 class="text-base font-bold text-slate-800" id="authModalTitle">Enter Access Password</h3>
+                <p class="text-xs text-slate-500 mt-1" id="authModalSubtext">Password will be saved on your device for future seamless access.</p>
+            </div>
+            
+            <form onsubmit="handleAuthSubmit(event)" class="mt-4 space-y-3">
+                <input type="password" id="authPasswordInput" required placeholder="Enter Secret Password" class="w-full px-4 py-2.5 text-center text-sm tracking-widest border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 outline-none">
+                <div class="flex gap-2 pt-1">
+                    <button type="button" onclick="closeModal('authModal')" class="w-1/2 py-2 text-xs font-semibold text-slate-600 bg-slate-100 rounded-xl">Cancel</button>
+                    <button type="submit" class="w-1/2 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow">Verify & Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MEMBER DELETE CONFIRMATION MODAL WITH PASSWORD -->
+    <div id="deleteMemberModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-slate-100">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-xl">
+                    <i class="fa-solid fa-user-minus"></i>
+                </div>
+                <h3 class="text-base font-bold text-slate-800">Confirm Member Deletion</h3>
+                <p class="text-xs text-slate-500 mt-1">Please enter the master deletion password (<span class="font-mono text-rose-600 font-bold">EXIT</span>) to delete this member.</p>
+            </div>
+            
+            <form onsubmit="handleDeleteMemberSubmit(event)" class="mt-4 space-y-3">
+                <input type="password" id="deletePasswordInput" required placeholder="Enter Delete Password" class="w-full px-4 py-2.5 text-center text-sm tracking-widest border border-rose-300 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none uppercase">
+                <div class="flex gap-2 pt-1">
+                    <button type="button" onclick="closeModal('deleteMemberModal')" class="w-1/2 py-2 text-xs font-semibold text-slate-600 bg-slate-100 rounded-xl">Cancel</button>
+                    <button type="submit" class="w-1/2 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow">Delete Member</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD SECRETARIAT MEMBER -->
+    <div id="secretariatModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="text-base font-bold text-slate-800" id="secretariatModalTitle">Add Secretariat Member</h3>
+                <button onclick="closeModal('secretariatModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <form onsubmit="saveMemberSubmit(event)" class="mt-4 space-y-3.5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Full Name *</label>
+                    <input type="text" id="memberName" required placeholder="e.g. Muhammed Shafi" class="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Designation / Role *</label>
+                    <select id="memberRole" required class="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 outline-none bg-white">
+                        <option value="President">President</option>
+                        <option value="Secretary">Secretary</option>
+                        <option value="Vice President">Vice President</option>
+                        <option value="Joint Secretary">Joint Secretary</option>
+                        <option value="Treasurer">Treasurer</option>
+                        <option value="Executive Member">Executive Member</option>
+                        <option value="Secretariat Member">Secretariat Member</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Contact Number</label>
+                    <input type="tel" id="memberPhone" placeholder="+91 9876543210" class="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 outline-none">
+                </div>
+
+                <div class="pt-2 flex justify-end space-x-2">
+                    <button type="button" onclick="closeModal('secretariatModal')" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 rounded-xl">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow">Save Member</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: LOG MEETING & MINUTES -->
+    <div id="meetingModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="text-base font-bold text-slate-800" id="meetingModalTitle">Log Secretariat Meeting</h3>
+                <button onclick="closeModal('meetingModal')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form onsubmit="saveMeetingSubmit(event)" class="mt-4 space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Meeting Date *</label>
+                        <input type="date" id="meetingDate" required class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-sky-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Place / Venue *</label>
+                        <input type="text" id="meetingPlace" required placeholder="e.g. Unit Office / Town Hall" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-sky-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Member Attendance Status</label>
+                    <p class="text-[11px] text-slate-500 mb-2">Click status for each member: Green (Present), Yellow (Excused/Late), Red (Leave).</p>
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 max-h-56 overflow-y-auto space-y-2.5" id="attendanceList">
+                        <!-- Dynamic Attendance -->
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 bg-slate-100 p-3 rounded-xl">
+                    <div class="text-center">
+                        <span class="block text-[10px] text-emerald-700 font-bold uppercase">Present</span>
+                        <span id="cntPresent" class="text-base font-bold text-emerald-600">0</span>
+                    </div>
+                    <div class="text-center">
+                        <span class="block text-[10px] text-amber-700 font-bold uppercase">Late / Excused</span>
+                        <span id="cntLate" class="text-base font-bold text-amber-600">0</span>
+                    </div>
+                    <div class="text-center">
+                        <span class="block text-[10px] text-rose-700 font-bold uppercase">Leave</span>
+                        <span id="cntLeave" class="text-base font-bold text-rose-600">0</span>
+                    </div>
+                </div>
+
+                <div class="space-y-4 pt-1">
+                    <!-- Meeting Photo -->
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 flex items-center justify-between">
+                            <span><i class="fa-solid fa-camera text-sky-600 mr-1"></i> Meeting Photo</span>
+                            <span class="text-[10px] text-slate-400 font-normal">Optional</span>
+                        </label>
+                        
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="document.getElementById('meetingCamInput').click()" class="bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm">
+                                <i class="fa-solid fa-camera"></i> Take Photo
+                            </button>
+                            <input type="file" id="meetingCamInput" accept="image/*" capture="environment" onchange="handleFilePreview(this, 'meetingPhotoPreview')" class="hidden">
+
+                            <label class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer flex items-center gap-1.5 transition-all shadow-sm">
+                                <i class="fa-solid fa-upload text-slate-400"></i> Browse File
+                                <input type="file" id="meetingPhotoInput" accept="image/*" onchange="handleFilePreview(this, 'meetingPhotoPreview')" class="hidden">
+                            </label>
+                        </div>
+                        <img id="meetingPhotoPreview" class="mt-2 h-24 rounded-lg border object-cover hidden cursor-pointer" onclick="openImageViewer(this.src, 'Meeting Photo Preview')">
+                    </div>
+
+                    <!-- Minutes Book Photo -->
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-2 flex items-center justify-between">
+                            <span><i class="fa-solid fa-book-open text-sky-600 mr-1"></i> Minutes Book Photo</span>
+                            <span class="text-[10px] text-slate-400 font-normal">Optional</span>
+                        </label>
+                        
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="document.getElementById('minutesCamInput').click()" class="bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm">
+                                <i class="fa-solid fa-camera"></i> Take Photo
+                            </button>
+                            <input type="file" id="minutesCamInput" accept="image/*" capture="environment" onchange="handleFilePreview(this, 'minutesPhotoPreview')" class="hidden">
+
+                            <label class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer flex items-center gap-1.5 transition-all shadow-sm">
+                                <i class="fa-solid fa-upload text-slate-400"></i> Browse File
+                                <input type="file" id="minutesPhotoInput" accept="image/*" onchange="handleFilePreview(this, 'minutesPhotoPreview')" class="hidden">
+                            </label>
+                        </div>
+                        <img id="minutesPhotoPreview" class="mt-2 h-24 rounded-lg border object-cover hidden cursor-pointer" onclick="openImageViewer(this.src, 'Minutes Book Photo')">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Key Decisions / Notes</label>
+                    <textarea id="meetingNotes" rows="2" placeholder="Summary of decisions taken in the meeting..." class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 outline-none"></textarea>
+                </div>
+
+                <div class="pt-2 flex justify-end space-x-2">
+                    <button type="button" onclick="closeModal('meetingModal')" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 rounded-xl">Cancel</button>
+                    <button type="submit" id="submitMeetingBtn" class="px-5 py-2 text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-xl shadow flex items-center gap-1.5">
+                        <span>Submit Minutes</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CUSTOM ALERT MODAL -->
+    <div id="customAlertModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-xl border border-slate-100 text-center">
+            <h3 class="text-base font-bold text-slate-800" id="alertTitle">Notice</h3>
+            <p class="text-xs text-slate-600 mt-2" id="alertMessage"></p>
+            <button onclick="closeModal('customAlertModal')" class="mt-4 w-full py-2 bg-slate-900 text-white font-semibold text-xs rounded-xl">OK</button>
+        </div>
+    </div>
+
+    <!-- FIREBASE & APPLICATION LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBhy9C1LoM-VBTcEGJVyZ5SGpbUg6fBdB8",
+            authDomain: "meeting-49a0e.firebaseapp.com",
+            projectId: "meeting-49a0e",
+            storageBucket: "meeting-49a0e.firebasestorage.app",
+            messagingSenderId: "716083133615",
+            appId: "1:716083133615:web:86b1f9b28d31c81b25a85a"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Cloudinary Settings
+        const CLOUD_NAME = "guqmosat";
+        const UPLOAD_PRESET = "dvtnmwnx";
+
+        // REQUIRED LOG AREA MASTER PASSWORD
+        const MEETINGS_LOG_MASTER_PASSWORD = "admin@_shadil";
+
+        // Notification Audio Alert Sound
+        const NOTIFICATION_SOUND_URL = "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3";
+        const alertAudio = new Audio(NOTIFICATION_SOUND_URL);
+
+        // District Hierarchy
+        const DISTRICT_DATA = [
+            { name: "BALUSSERY", units: ["PUTHOOR VATTAM", "BALUSSERI TOWN", "BALUSSERI", "ARAPPEEDLKA", "VATTOLI BAZAR", "NANMINDA 14", "POONATH", "KOORACHUND"] },
+            { name: "NADAPURAM", units: ["THUNERI", "NADAPURAM", "VANIMEL", "KALLAACHI", "CHEEKKONNU", "THANNEER PANTHAL"] },
+            { name: "POONOOR", units: ["THALAYAD", "THACHAMPOYIL", "VALLIYOTH", "EKAROOL", "POONOOR", "KEDAVOOR", "KOLIKKAL"] },
+            { name: "KOYILANDY", units: ["KATTIL PEEDIKA", "KAPPAD", "CHANGOOTUKAVU", "KOYILANDY", "KOLLAM", "MUDADI", "ARIKKULAM", "KAVUMVATTAM"] },
+            { name: "PERAMBRA", units: ["PANTHIRIKKARA", "PERAMBRA", "ERAVTTOOR", "KADIYANGAD PALAM", "NOCHAD", "MEPPAYYUR", "EAST PERAMBRA"] },
+            { name: "PAYYOLI", units: ["PAYYOLI", "THURAYUR", "THIKKODI", "NANDI", "KEEZHUR"] },
+            { name: "VATAKARA", units: ["VATAKARA", "MANIYOOR", "ORKATTERI", "AZHIYUR"] }
+        ];
+
+        // Passwords Mapping
+        const PASSWORDS = {
+            "BALUSSERY_MANDALAM": "BAL#8201", "BALUSSERY_PUTHOOR VATTAM": "PVT#3101", "BALUSSERY_BALUSSERI TOWN": "BST#3102", "BALUSSERY_BALUSSERI": "BLS#3103", "BALUSSERY_ARAPPEEDLKA": "APK#3104", "BALUSSERY_VATTOLI BAZAR": "VTB#3105", "BALUSSERY_NANMINDA 14": "NM14#3106", "BALUSSERY_POONATH": "PNT#3107", "BALUSSERY_KOORACHUND": "KRC#3108",
+            "NADAPURAM_MANDALAM": "NDP#8202", "NADAPURAM_THUNERI": "TNR#3201", "NADAPURAM_NADAPURAM": "NDP#3202", "NADAPURAM_VANIMEL": "VNM#3203", "NADAPURAM_KALLAACHI": "KLC#3204", "NADAPURAM_CHEEKKONNU": "CHK#3205", "NADAPURAM_THANNEER PANTHAL": "TNP#3206",
+            "POONOOR_MANDALAM": "PNR#8203", "POONOOR_THALAYAD": "TLD#3301", "POONOOR_THACHAMPOYIL": "TCP#3302", "POONOOR_VALLIYOTH": "VLY#3303", "POONOOR_EKAROOL": "EKL#3304", "POONOOR_POONOOR": "PNR#3305", "POONOOR_KEDAVOOR": "KDV#3306", "POONOOR_KOLIKKAL": "KLK#3307",
+            "KOYILANDY_MANDALAM": "KYL#8204", "KOYILANDY_KATTIL PEEDIKA": "KTP#3401", "KOYILANDY_KAPPAD": "KPD#3402", "KOYILANDY_CHANGOOTUKAVU": "CGK#3403", "KOYILANDY_KOYILANDY": "KYL#3404", "KOYILANDY_KOLLAM": "KLM#3405", "KOYILANDY_MUDADI": "MDD#3406", "KOYILANDY_ARIKKULAM": "AKL#3407", "KOYILANDY_KAVUMVATTAM": "KVM#3408",
+            "PERAMBRA_MANDALAM": "PRM#8205", "PERAMBRA_PANTHIRIKKARA": "PTK#3501", "PERAMBRA_PERAMBRA": "PRM#3502", "PERAMBRA_ERAVTTOOR": "EVT#3503", "PERAMBRA_KADIYANGAD PALAM": "KGP#3504", "PERAMBRA_NOCHAD": "NCD#3505", "PERAMBRA_MEPPAYYUR": "MPY#3506", "PERAMBRA_EAST PERAMBRA": "EPR#3507",
+            "PAYYOLI_MANDALAM": "PYL#8206", "PAYYOLI_PAYYOLI": "PYL#3601", "PAYYOLI_THURAYUR": "TRY#3602", "PAYYOLI_THIKKODI": "TKD#3603", "PAYYOLI_NANDI": "NDI#3604", "PAYYOLI_KEEZHUR": "KZR#3605", "VATAKARA_MANDALAM": "VTK#8207", "VATAKARA_VATAKARA": "VTK#3701", "VATAKARA_MANIYOOR": "MNY#3702", "VATAKARA_ORKATTERI": "OKR#3703", "VATAKARA_AZHIYUR": "AZH#3704"
+        };
+
+        // Local Stores
+        let membersStore = JSON.parse(localStorage.getItem('ws_members_store')) || {};
+        let meetingsStore = JSON.parse(localStorage.getItem('ws_meetings_store')) || {};
+        let activeAnnouncement = JSON.parse(localStorage.getItem('ws_active_announcement')) || null;
+        let lastNotifiedTs = localStorage.getItem('ws_last_notified_ts') || null;
+
+        let authenticatedKeys = JSON.parse(localStorage.getItem('ws_authenticated_keys')) || {};
+        let meetingLogsUnlocked = localStorage.getItem('ws_meetings_unlocked') === 'true';
+
+        let currentMandalam = null;
+        let currentUnit = null;
+        let pendingAction = null;
+        let pendingDeleteInfo = null;
+        let tempAttendanceState = {};
+        let currentZoomScale = 1;
+
+        let deferredPrompt = null;
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Registration error:', err));
+        }
+
+        // PWA Prompt Listener
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const btn = document.getElementById('pwaInstallBtn');
+            if (btn) btn.classList.remove('hidden');
+        });
+
+        window.triggerPWAInstall = function() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    deferredPrompt = null;
+                });
+            }
+        };
+
+        // Request Push Notification Permission
+        if ('Notification' in window && Notification.permission !== 'granted') {
+            Notification.requestPermission();
+        }
+
+        function saveLocalState() {
+            localStorage.setItem('ws_members_store', JSON.stringify(membersStore));
+            localStorage.setItem('ws_meetings_store', JSON.stringify(meetingsStore));
+            localStorage.setItem('ws_authenticated_keys', JSON.stringify(authenticatedKeys));
+            localStorage.setItem('ws_meetings_unlocked', meetingLogsUnlocked);
+            localStorage.setItem('ws_active_announcement', JSON.stringify(activeAnnouncement));
+        }
+
+        // Initialize Firebase Anonymous Auth
+        signInAnonymously(auth).then(() => {
+            updateSyncStatus(true);
+            listenFirestoreSync();
+        }).catch(err => {
+            console.warn("Offline mode active:", err);
+            updateSyncStatus(false);
+        });
+
+        function updateSyncStatus(isOnline) {
+            const badge = document.getElementById('syncBadge');
+            const status = document.getElementById('syncStatus');
+            const icon = document.getElementById('syncIcon');
+
+            if (isOnline) {
+                badge.className = "flex items-center text-[10px] bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-full font-semibold border border-emerald-200";
+                icon.className = "fa-solid fa-cloud text-emerald-600 mr-1.5";
+                status.innerText = "Cloud Synced";
+            } else {
+                badge.className = "flex items-center text-[10px] bg-amber-50 text-amber-800 px-2.5 py-1 rounded-full font-semibold border border-amber-200";
+                icon.className = "fa-solid fa-wifi text-amber-500 mr-1.5";
+                status.innerText = "Offline Store";
+            }
+        }
+
+        function listenFirestoreSync() {
+            try {
+                const docRef = doc(db, 'artifacts', 'meeting-49a0e', 'public', 'data', 'calicut_north', 'store');
+                onSnapshot(docRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const cloudData = docSnap.data();
+                        if (cloudData.membersStore) membersStore = cloudData.membersStore;
+                        if (cloudData.meetingsStore) meetingsStore = cloudData.meetingsStore;
+                        
+                        if (cloudData.activeAnnouncement !== undefined) {
+                            const isNew = cloudData.activeAnnouncement && cloudData.activeAnnouncement.timestamp !== lastNotifiedTs;
+                            activeAnnouncement = cloudData.activeAnnouncement;
+                            
+                            if (isNew) {
+                                triggerAnnouncementAlert(activeAnnouncement);
+                                lastNotifiedTs = activeAnnouncement.timestamp;
+                                localStorage.setItem('ws_last_notified_ts', lastNotifiedTs);
+                            }
+                        }
+
+                        saveLocalState();
+                        renderAnnouncementBanner();
+                        refreshCurrentView();
+                    }
+                }, (error) => console.log("Firestore offline read:", error));
+            } catch (e) {
+                console.log("Offline mode active");
+            }
+        }
+
+        function triggerAnnouncementAlert(ann) {
+            if (!ann) return;
+            // Play High Volume Sound
+            try {
+                alertAudio.currentTime = 0;
+                alertAudio.play().catch(e => console.log("Audio play prevented:", e));
+            } catch(e) {}
+
+            // Send System Notification
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(ann.title, {
+                    body: `Date: ${ann.date} | Venue: ${ann.location}`,
+                    icon: 'studentlogo.jpg',
+                    vibrate: [200, 100, 200]
+                });
+            }
+        }
+
+        function renderAnnouncementBanner() {
+            const banner = document.getElementById('announcementBanner');
+            if (!banner) return;
+
+            if (activeAnnouncement) {
+                document.getElementById('annTitle').innerText = activeAnnouncement.title;
+                document.getElementById('annDate').innerText = activeAnnouncement.date;
+                document.getElementById('annLocation').innerText = activeAnnouncement.location;
+                document.getElementById('annDetails').innerText = activeAnnouncement.details || 'Join us for this event.';
+                banner.classList.remove('hidden');
+            } else {
+                banner.classList.add('hidden');
+            }
+        }
+
+        async function syncToCloud() {
+            if (!auth.currentUser) return;
+            try {
+                const docRef = doc(db, 'artifacts', 'meeting-49a0e', 'public', 'data', 'calicut_north', 'store');
+                await setDoc(docRef, {
+                    membersStore,
+                    meetingsStore,
+                    activeAnnouncement,
+                    lastUpdated: new Date().toISOString()
+                }, { merge: true });
+            } catch (e) {
+                console.error("Cloud sync pending...", e);
+            }
+        }
+
+        async function uploadToCloudinary(file) {
+            if (!file) return null;
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', UPLOAD_PRESET);
+
+            try {
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                return data.secure_url || null;
+            } catch (e) {
+                console.error("Cloudinary upload failed, falling back locally", e);
+                return null;
+            }
+        }
+
+        // TOGGLE MEETINGS LOCK STATUS (LOCK IF UNLOCKED)
+        window.toggleMeetingsLock = function() {
+            if (meetingLogsUnlocked) {
+                meetingLogsUnlocked = false;
+                saveLocalState();
+                updateMeetingsLockUI();
+                alertModal("Locked", "Meeting log section is now re-locked.");
+            }
+        };
+
+        // VERIFY MEETINGS LOG MASTER PASSWORD
+        window.verifyMeetingsPassword = function(e, scope) {
+            e.preventDefault();
+            const inputId = scope === 'mandalam' ? 'mandalamLogPassInput' : 'unitLogPassInput';
+            const enteredPass = document.getElementById(inputId).value.trim();
+
+            if (enteredPass === MEETINGS_LOG_MASTER_PASSWORD) {
+                meetingLogsUnlocked = true;
+                saveLocalState();
+                updateMeetingsLockUI();
+                alertModal("Access Granted", "Meetings & Minutes log unlocked successfully!");
+            } else {
+                alertModal("Access Denied", "Incorrect password! Access restricted.");
+            }
+        };
+
+        function updateMeetingsLockUI() {
+            const mandalamOverlay = document.getElementById('mandalamMeetingsLockOverlay');
+            const mandalamContent = document.getElementById('mandalamMeetingsContent');
+            const mandalamBadge = document.getElementById('mandalamMeetingLockBadge');
+
+            const unitOverlay = document.getElementById('unitMeetingsLockOverlay');
+            const unitContent = document.getElementById('unitMeetingsContent');
+            const unitBadge = document.getElementById('unitMeetingLockBadge');
+
+            if (meetingLogsUnlocked) {
+                if (mandalamOverlay) mandalamOverlay.classList.add('hidden');
+                if (mandalamContent) mandalamContent.classList.remove('hidden');
+                if (mandalamBadge) {
+                    mandalamBadge.className = "text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1 hover:opacity-80 transition-all cursor-pointer";
+                    mandalamBadge.innerHTML = `<i class="fa-solid fa-lock-open"></i> Unlocked`;
+                    mandalamBadge.title = "Click to lock again";
+                }
+
+                if (unitOverlay) unitOverlay.classList.add('hidden');
+                if (unitContent) unitContent.classList.remove('hidden');
+                if (unitBadge) {
+                    unitBadge.className = "text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1 hover:opacity-80 transition-all cursor-pointer";
+                    unitBadge.innerHTML = `<i class="fa-solid fa-lock-open"></i> Unlocked`;
+                    unitBadge.title = "Click to lock again";
+                }
+            } else {
+                if (mandalamOverlay) mandalamOverlay.classList.remove('hidden');
+                if (mandalamContent) mandalamContent.classList.add('hidden');
+                if (mandalamBadge) {
+                    mandalamBadge.className = "text-[10px] font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200 flex items-center gap-1 hover:opacity-80 transition-all cursor-pointer";
+                    mandalamBadge.innerHTML = `<i class="fa-solid fa-lock"></i> Protected`;
+                    mandalamBadge.title = "Protected section";
+                }
+
+                if (unitOverlay) unitOverlay.classList.remove('hidden');
+                if (unitContent) unitContent.classList.add('hidden');
+                if (unitBadge) {
+                    unitBadge.className = "text-[10px] font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200 flex items-center gap-1 hover:opacity-80 transition-all cursor-pointer";
+                    unitBadge.innerHTML = `<i class="fa-solid fa-lock"></i> Protected`;
+                    unitBadge.title = "Protected section";
+                }
+            }
+        }
+
+        // Image Full-Screen Viewer
+        window.openImageViewer = function(imgSrc, title = 'Image Preview') {
+            const modal = document.getElementById('imageViewerModal');
+            const img = document.getElementById('modalPreviewImage');
+            const titleEl = document.getElementById('imageViewerTitle');
+            
+            titleEl.innerText = title;
+            img.src = imgSrc;
+            currentZoomScale = 1;
+            img.style.transform = `scale(${currentZoomScale})`;
+            modal.classList.remove('hidden');
+        };
+
+        window.zoomImage = function(amount) {
+            const img = document.getElementById('modalPreviewImage');
+            currentZoomScale = Math.min(Math.max(0.5, currentZoomScale + amount), 4);
+            img.style.transform = `scale(${currentZoomScale})`;
+        };
+
+        window.resetZoomImage = function() {
+            const img = document.getElementById('modalPreviewImage');
+            currentZoomScale = 1;
+            img.style.transform = `scale(${currentZoomScale})`;
+        };
+
+        window.promptAuth = function(type, callback) {
+            const entityKey = type === 'mandalam' ? `${currentMandalam.name}_MANDALAM` : `${currentMandalam.name}_${currentUnit}`;
+            
+            if (authenticatedKeys[entityKey]) {
+                callback();
+                return;
+            }
+
+            pendingAction = { key: entityKey, callback };
+            document.getElementById('authPasswordInput').value = '';
+            document.getElementById('authModalTitle').innerText = type === 'mandalam' ? `${currentMandalam.name} Password` : `${currentUnit} Password`;
+            document.getElementById('authModal').classList.remove('hidden');
+        };
+
+        window.handleAuthSubmit = function(e) {
+            e.preventDefault();
+            const inputPass = document.getElementById('authPasswordInput').value.trim();
+            const correctPass = PASSWORDS[pendingAction.key];
+
+            if (inputPass === correctPass) {
+                authenticatedKeys[pendingAction.key] = true;
+                saveLocalState();
+                closeModal('authModal');
+                if (pendingAction && pendingAction.callback) pendingAction.callback();
+            } else {
+                alertModal("Access Denied", "Incorrect password! Please enter the valid password.");
+            }
+        };
+
+        window.onload = function() {
+            renderAnnouncementBanner();
+            renderMandalams();
+            document.getElementById('meetingDate').value = new Date().toISOString().split('T')[0];
+            updateMeetingsLockUI();
+        };
+
+        function renderMandalams() {
+            const grid = document.getElementById('mandalamGrid');
+            grid.innerHTML = '';
+
+            DISTRICT_DATA.forEach(m => {
+                const mKey = m.name + "_MANDALAM";
+                const mMembers = membersStore[mKey] || [];
+                const mMeetings = meetingsStore[mKey] || [];
+
+                const card = document.createElement('div');
+                card.className = "bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group";
+                card.onclick = () => selectMandalam(m);
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-[10px] font-bold text-sky-700 bg-sky-50 border border-sky-100 px-2 py-0.5 rounded uppercase">Zone</span>
+                            <span class="text-xs text-slate-400 font-medium">${m.units.length} Units</span>
+                        </div>
+                        <h4 class="text-base font-bold text-slate-800 group-hover:text-sky-600 transition-colors">${m.name}</h4>
+                        <p class="text-xs text-slate-500 mt-1">${m.units.slice(0, 3).join(', ')}...</p>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                        <span class="flex items-center gap-1.5">
+                            <i class="fa-solid fa-users text-slate-400"></i> ${mMembers.length} Execs
+                        </span>
+                        <span class="flex items-center gap-1.5">
+                            <i class="fa-solid fa-clipboard-check text-slate-400"></i> ${mMeetings.length} Meetings
+                        </span>
+                        <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-sky-600 transition-colors"></i>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function selectMandalam(mandalam) {
+            currentMandalam = mandalam;
+            currentUnit = null;
+
+            document.getElementById('mandalamTitle').innerText = `${mandalam.name} (Mandalam)`;
+            document.getElementById('unitCountTag').innerText = `${mandalam.units.length} Units`;
+
+            document.getElementById('bc-mandalam').innerText = mandalam.name;
+            document.getElementById('bc-mandalam').classList.remove('hidden');
+            document.getElementById('bc1-sep').classList.remove('hidden');
+            document.getElementById('bc-unit').classList.add('hidden');
+            document.getElementById('bc2-sep').classList.add('hidden');
+            document.getElementById('headerContextText').innerText = `${mandalam.name} Mandalam`;
+
+            renderUnits();
+            renderMandalamMembers();
+            renderMandalamMeetings();
+            updateMeetingsLockUI();
+            switchView('mandalam');
+        }
+
+        function renderUnits() {
+            const grid = document.getElementById('unitGrid');
+            grid.innerHTML = '';
+
+            currentMandalam.units.forEach(u => {
+                const uKey = `${currentMandalam.name}_${u}`;
+                const uMembers = membersStore[uKey] || [];
+                const uMeetings = meetingsStore[uKey] || [];
+
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-xl border border-slate-200 hover:border-sky-300 hover:shadow-sm transition-all cursor-pointer flex items-center justify-between group";
+                card.onclick = () => selectUnit(u);
+
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold text-xs group-hover:bg-sky-600 group-hover:text-white transition-colors">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-800 group-hover:text-sky-600 transition-colors">${u}</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5">${uMembers.length} Members • ${uMeetings.length} Meetings</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-angle-right text-slate-300 group-hover:text-sky-600 transition-colors"></i>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function selectUnit(unitName) {
+            currentUnit = unitName;
+
+            document.getElementById('unitTitle').innerText = `${unitName} (Unit)`;
+            document.getElementById('unitSubtext').innerText = `Under ${currentMandalam.name} Mandalam Secretariat`;
+
+            document.getElementById('bc-unit').innerText = unitName;
+            document.getElementById('bc-unit').classList.remove('hidden');
+            document.getElementById('bc2-sep').classList.remove('hidden');
+            document.getElementById('headerContextText').innerText = `${unitName} Unit`;
+
+            renderUnitMembers();
+            renderUnitMeetings();
+            updateMeetingsLockUI();
+            switchView('unit');
+        }
+
+        function renderMandalamMembers() {
+            const mKey = `${currentMandalam.name}_MANDALAM`;
+            const members = membersStore[mKey] || [];
+            const container = document.getElementById('mandalamMemberList');
+            container.innerHTML = '';
+
+            if (members.length === 0) {
+                container.innerHTML = `<div class="col-span-full py-4 text-center text-xs text-slate-400">No Secretariat members added yet.</div>`;
+                return;
+            }
+
+            members.forEach((m, idx) => {
+                const el = document.createElement('div');
+                el.className = "flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50/60";
+                el.innerHTML = `
+                    <div class="flex items-center space-x-2.5">
+                        <div class="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs">
+                            ${m.name.charAt(0)}
+                        </div>
+                        <div>
+                            <h5 class="text-xs font-bold text-slate-800">${m.name}</h5>
+                            <span class="text-[10px] font-semibold text-sky-600">${m.role}</span>
+                        </div>
+                    </div>
+                    <button onclick="promptDeleteMember('${mKey}', ${idx}, '${m.name}')" class="text-slate-300 hover:text-rose-500 transition-colors p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                `;
+                container.appendChild(el);
+            });
+        }
+
+        function renderUnitMembers() {
+            const uKey = `${currentMandalam.name}_${currentUnit}`;
+            const members = membersStore[uKey] || [];
+            const container = document.getElementById('unitMemberList');
+            container.innerHTML = '';
+
+            if (members.length === 0) {
+                container.innerHTML = `<div class="col-span-full py-6 text-center text-xs text-slate-400">No Unit Executive members added yet. Click "+ Add Member" to add members.</div>`;
+                return;
+            }
+
+            members.forEach((m, idx) => {
+                const el = document.createElement('div');
+                el.className = "flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50/60";
+                el.innerHTML = `
+                    <div class="flex items-center space-x-2.5">
+                        <div class="w-8 h-8 rounded-full bg-sky-600 text-white flex items-center justify-center font-bold text-xs">
+                            ${m.name.charAt(0)}
+                        </div>
+                        <div>
+                            <h5 class="text-xs font-bold text-slate-800">${m.name}</h5>
+                            <span class="text-[10px] font-semibold text-sky-600">${m.role}</span>
+                            ${m.phone ? `<p class="text-[10px] text-slate-400">${m.phone}</p>` : ''}
+                        </div>
+                    </div>
+                    <button onclick="promptDeleteMember('${uKey}', ${idx}, '${m.name}')" class="text-slate-300 hover:text-rose-500 transition-colors p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                `;
+                container.appendChild(el);
+            });
+        }
+
+        window.promptDeleteMember = function(key, idx, name) {
+            pendingDeleteInfo = { key, idx, name };
+            document.getElementById('deletePasswordInput').value = '';
+            document.getElementById('deleteMemberModal').classList.remove('hidden');
+        };
+
+        window.handleDeleteMemberSubmit = function(e) {
+            e.preventDefault();
+            const inputPass = document.getElementById('deletePasswordInput').value.trim();
+
+            if (inputPass.toUpperCase() === 'EXIT') {
+                if (pendingDeleteInfo) {
+                    const { key, idx } = pendingDeleteInfo;
+                    membersStore[key].splice(idx, 1);
+                    saveLocalState();
+                    syncToCloud();
+                    closeModal('deleteMemberModal');
+                    alertModal("Member Deleted", "The member has been successfully deleted.");
+                    refreshCurrentView();
+                }
+            } else {
+                alertModal("Access Denied", "Incorrect password for member deletion!");
+            }
+        };
+
+        window.openSecretariatModal = function(type) {
+            document.getElementById('secretariatModalTitle').innerText = type === 'mandalam' ? `Add ${currentMandalam.name} Secretariat Member` : `Add ${currentUnit} Secretariat Member`;
+            document.getElementById('secretariatModal').setAttribute('data-type', type);
+            document.getElementById('memberName').value = '';
+            document.getElementById('memberPhone').value = '';
+            document.getElementById('secretariatModal').classList.remove('hidden');
+        };
+
+        window.saveMemberSubmit = function(e) {
+            e.preventDefault();
+            const type = document.getElementById('secretariatModal').getAttribute('data-type');
+            const name = document.getElementById('memberName').value;
+            const role = document.getElementById('memberRole').value;
+            const phone = document.getElementById('memberPhone').value;
+
+            const entityKey = type === 'mandalam' ? `${currentMandalam.name}_MANDALAM` : `${currentMandalam.name}_${currentUnit}`;
+
+            if (!membersStore[entityKey]) membersStore[entityKey] = [];
+            membersStore[entityKey].push({ name, role, phone });
+
+            saveLocalState();
+            syncToCloud();
+            closeModal('secretariatModal');
+            alertModal("Success", "Member saved and synced successfully!");
+            refreshCurrentView();
+        };
+
+        window.openMeetingModal = function(type) {
+            const uKey = type === 'mandalam' ? `${currentMandalam.name}_MANDALAM` : `${currentMandalam.name}_${currentUnit}`;
+            const members = membersStore[uKey] || [];
+
+            if (members.length === 0) {
+                alertModal("Action Required", "Please add Secretariat & Executive members before logging a meeting.");
+                return;
+            }
+
+            tempAttendanceState = {};
+            const list = document.getElementById('attendanceList');
+            list.innerHTML = '';
+            
+            members.forEach((m, idx) => {
+                tempAttendanceState[m.name] = { status: 'present', reason: '' };
+
+                const item = document.createElement('div');
+                item.className = "p-2.5 rounded-xl border border-slate-200 bg-white shadow-sm space-y-2";
+                item.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="font-bold text-xs text-slate-800">${m.name}</span>
+                            <span class="text-[10px] font-semibold text-sky-700 bg-sky-50 px-2 py-0.5 rounded ml-2 border border-sky-100">${m.role}</span>
+                        </div>
+
+                        <div class="flex items-center space-x-1.5" id="btnGroup-${idx}">
+                            <button type="button" onclick="setAttendanceStatus(${idx}, '${m.name}', 'present')" title="Present" class="att-btn active-present w-7 h-7 rounded-lg border flex items-center justify-center text-xs font-bold shadow-sm">
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                            <button type="button" onclick="setAttendanceStatus(${idx}, '${m.name}', 'late')" title="Excused / Late" class="att-btn bg-slate-100 border-slate-200 text-slate-500 hover:bg-amber-100 w-7 h-7 rounded-lg border flex items-center justify-center text-xs font-bold shadow-sm">
+                                <i class="fa-solid fa-clock"></i>
+                            </button>
+                            <button type="button" onclick="setAttendanceStatus(${idx}, '${m.name}', 'leave')" title="On Leave" class="att-btn bg-slate-100 border-slate-200 text-slate-500 hover:bg-rose-100 w-7 h-7 rounded-lg border flex items-center justify-center text-xs font-bold shadow-sm">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="reasonBox-${idx}" class="hidden pt-1">
+                        <input type="text" id="reasonInput-${idx}" oninput="updateLeaveReason('${m.name}', this.value)" placeholder="Specify leave reason..." class="w-full px-2.5 py-1.5 text-xs border border-rose-300 rounded-lg outline-none focus:ring-1 focus:ring-rose-500 bg-rose-50/40 text-slate-700">
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+
+            updateAttendanceCounts();
+            document.getElementById('meetingModalTitle').innerText = type === 'mandalam' ? `Mandalam Meeting Log` : `Unit Meeting Log (${currentUnit})`;
+            document.getElementById('meetingModal').setAttribute('data-type', type);
+            document.getElementById('meetingModal').classList.remove('hidden');
+        };
+
+        window.setAttendanceStatus = function(idx, memberName, status) {
+            tempAttendanceState[memberName].status = status;
+            
+            const btnGroup = document.getElementById(`btnGroup-${idx}`);
+            const buttons = btnGroup.querySelectorAll('.att-btn');
+            const reasonBox = document.getElementById(`reasonBox-${idx}`);
+
+            buttons[0].className = status === 'present' ? 'att-btn active-present w-7 h-7 rounded-lg border flex items-center justify-center text-xs font-bold shadow-sm' : 'att-btn bg-slate-100 border-slate-200 text-slate-500 hover:bg-emerald-100 w-7 h-7 rounded-lg border flex items-center justify-center text-xs font-bold shadow-sm';
+            buttons[1].className = status === 'late' ? 'att-btn active-late w-7 h-7 rounded-lg border flex items-center justify-center text-xs font-bold shadow-sm' : 'att-btn bg-slate-100 border-slate-200 text-slate-500 hover:bg-amber-100 w-7 h-7 rounded-lg border flex items-center justify-center text-xs font-bold shadow-sm';
+            buttons[2].className = status === 'leave' ? 'att-btn active-leave w-7 h-7 rounded-lg border flex items-center justify-center text-xs font-bold shadow-sm' : 'att-btn bg-slate-100 border-slate-200 text-slate-500 hover:bg-rose-100 w-7 h-7 rounded-lg border flex items-center justify-center text-xs font-bold shadow-sm';
+
+            if (status === 'leave') {
+                reasonBox.classList.remove('hidden');
+            } else {
+                reasonBox.classList.add('hidden');
+            }
+
+            updateAttendanceCounts();
+        };
+
+        window.updateLeaveReason = function(memberName, reasonStr) {
+            if (tempAttendanceState[memberName]) {
+                tempAttendanceState[memberName].reason = reasonStr;
+            }
+        };
+
+        window.updateAttendanceCounts = function() {
+            let p = 0, l = 0, lv = 0;
+            Object.values(tempAttendanceState).forEach(val => {
+                if (val.status === 'present') p++;
+                else if (val.status === 'late') l++;
+                else if (val.status === 'leave') lv++;
+            });
+
+            document.getElementById('cntPresent').innerText = p;
+            document.getElementById('cntLate').innerText = l;
+            document.getElementById('cntLeave').innerText = lv;
+        };
+
+        window.saveMeetingSubmit = async function(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitMeetingBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Uploading...`;
+
+            const type = document.getElementById('meetingModal').getAttribute('data-type');
+            const uKey = type === 'mandalam' ? `${currentMandalam.name}_MANDALAM` : `${currentMandalam.name}_${currentUnit}`;
+
+            const date = document.getElementById('meetingDate').value;
+            const place = document.getElementById('meetingPlace').value;
+            const notes = document.getElementById('meetingNotes').value;
+
+            const attendedCount = document.getElementById('cntPresent').innerText;
+            const lateCount = document.getElementById('cntLate').innerText;
+            const leaveCount = document.getElementById('cntLeave').innerText;
+
+            const mPhotoInput = document.getElementById('meetingPhotoInput').files[0] || document.getElementById('meetingCamInput').files[0];
+            const minPhotoInput = document.getElementById('minutesPhotoInput').files[0] || document.getElementById('minutesCamInput').files[0];
+
+            const meetingPhotoUrl = await uploadToCloudinary(mPhotoInput) || (document.getElementById('meetingPhotoPreview').src.startsWith('data:') ? document.getElementById('meetingPhotoPreview').src : null);
+            const minutesPhotoUrl = await uploadToCloudinary(minPhotoInput) || (document.getElementById('minutesPhotoPreview').src.startsWith('data:') ? document.getElementById('minutesPhotoPreview').src : null);
+
+            if(!meetingsStore[uKey]) meetingsStore[uKey] = [];
+            meetingsStore[uKey].unshift({
+                date,
+                place,
+                notes,
+                attendedCount,
+                lateCount,
+                leaveCount,
+                attendanceDetails: tempAttendanceState,
+                meetingPhoto: meetingPhotoUrl,
+                minutesPhoto: minutesPhotoUrl
+            });
+
+            saveLocalState();
+            await syncToCloud();
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<span>Submit Minutes</span>`;
+
+            closeModal('meetingModal');
+            alertModal("Success", "Meeting details, attendance & photos recorded successfully!");
+            refreshCurrentView();
+        };
+
+        function renderMandalamMeetings() {
+            const mKey = `${currentMandalam.name}_MANDALAM`;
+            const meetings = meetingsStore[mKey] || [];
+            const container = document.getElementById('mandalamMeetingsContent');
+            container.innerHTML = '';
+
+            if (meetings.length === 0) {
+                container.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs">No meetings logged for this Mandalam yet.</div>`;
+                return;
+            }
+
+            meetings.forEach(mt => {
+                const div = document.createElement('div');
+                div.className = "p-4 space-y-2.5";
+                
+                let leaveInfoList = '';
+                if (mt.attendanceDetails) {
+                    const absents = Object.entries(mt.attendanceDetails).filter(([_, v]) => v.status === 'leave');
+                    if (absents.length > 0) {
+                        leaveInfoList = absents.map(([name, data]) => `<span class="bg-rose-50 text-rose-700 text-[10px] px-2 py-0.5 rounded border border-rose-100"><b>${name}:</b> ${data.reason || 'No reason specified'}</span>`).join(' ');
+                    }
+                }
+
+                div.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-800"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i> ${mt.place}</span>
+                        <span class="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">${mt.date}</span>
+                    </div>
+                    <p class="text-xs text-slate-600">${mt.notes || 'No detailed notes provided.'}</p>
+                    
+                    <div class="flex flex-wrap items-center gap-2 pt-1 text-[11px]">
+                        <span class="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100"><i class="fa-solid fa-user-check mr-1"></i> Present: ${mt.attendedCount}</span>
+                        <span class="text-amber-700 font-semibold bg-amber-50 px-2 py-0.5 rounded border border-amber-100"><i class="fa-solid fa-clock mr-1"></i> Late: ${mt.lateCount || 0}</span>
+                        <span class="text-rose-700 font-semibold bg-rose-50 px-2 py-0.5 rounded border border-rose-100"><i class="fa-solid fa-user-xmark mr-1"></i> Leave: ${mt.leaveCount || 0}</span>
+                    </div>
+
+                    ${leaveInfoList ? `<div class="flex flex-wrap gap-1.5 pt-1">${leaveInfoList}</div>` : ''}
+
+                    ${mt.meetingPhoto || mt.minutesPhoto ? `
+                        <div class="flex gap-2 pt-2">
+                            ${mt.meetingPhoto ? `<img src="${mt.meetingPhoto}" onclick="openImageViewer('${mt.meetingPhoto}', 'Meeting Photo')" class="h-16 w-20 object-cover rounded-lg border cursor-pointer hover:opacity-90 hover:shadow transition-all" title="Click to view full image">` : ''}
+                            ${mt.minutesPhoto ? `<img src="${mt.minutesPhoto}" onclick="openImageViewer('${mt.minutesPhoto}', 'Minutes Book Photo')" class="h-16 w-20 object-cover rounded-lg border cursor-pointer hover:opacity-90 hover:shadow transition-all" title="Click to view full image">` : ''}
+                        </div>
+                    ` : ''}
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderUnitMeetings() {
+            const uKey = `${currentMandalam.name}_${currentUnit}`;
+            const meetings = meetingsStore[uKey] || [];
+            const container = document.getElementById('unitMeetingsContent');
+            container.innerHTML = '';
+
+            if (meetings.length === 0) {
+                container.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs">No meetings logged for this unit yet.</div>`;
+                return;
+            }
+
+            meetings.forEach(mt => {
+                const div = document.createElement('div');
+                div.className = "p-4 space-y-2.5";
+
+                let leaveInfoList = '';
+                if (mt.attendanceDetails) {
+                    const absents = Object.entries(mt.attendanceDetails).filter(([_, v]) => v.status === 'leave');
+                    if (absents.length > 0) {
+                        leaveInfoList = absents.map(([name, data]) => `<span class="bg-rose-50 text-rose-700 text-[10px] px-2 py-0.5 rounded border border-rose-100"><b>${name}:</b> ${data.reason || 'No reason specified'}</span>`).join(' ');
+                    }
+                }
+
+                div.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-800"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i> ${mt.place}</span>
+                        <span class="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">${mt.date}</span>
+                    </div>
+                    <p class="text-xs text-slate-600">${mt.notes || 'No detailed notes provided.'}</p>
+                    
+                    <div class="flex flex-wrap items-center gap-2 pt-1 text-[11px]">
+                        <span class="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100"><i class="fa-solid fa-user-check mr-1"></i> Present: ${mt.attendedCount}</span>
+                        <span class="text-amber-700 font-semibold bg-amber-50 px-2 py-0.5 rounded border border-amber-100"><i class="fa-solid fa-clock mr-1"></i> Late: ${mt.lateCount || 0}</span>
+                        <span class="text-rose-700 font-semibold bg-rose-50 px-2 py-0.5 rounded border border-rose-100"><i class="fa-solid fa-user-xmark mr-1"></i> Leave: ${mt.leaveCount || 0}</span>
+                    </div>
+
+                    ${leaveInfoList ? `<div class="flex flex-wrap gap-1.5 pt-1">${leaveInfoList}</div>` : ''}
+
+                    ${mt.meetingPhoto || mt.minutesPhoto ? `
+                        <div class="flex gap-2 pt-2">
+                            ${mt.meetingPhoto ? `<img src="${mt.meetingPhoto}" onclick="openImageViewer('${mt.meetingPhoto}', 'Meeting Photo')" class="h-16 w-20 object-cover rounded-lg border cursor-pointer hover:opacity-90 hover:shadow transition-all" title="Click to view full image">` : ''}
+                            ${mt.minutesPhoto ? `<img src="${mt.minutesPhoto}" onclick="openImageViewer('${mt.minutesPhoto}', 'Minutes Book Photo')" class="h-16 w-20 object-cover rounded-lg border cursor-pointer hover:opacity-90 hover:shadow transition-all" title="Click to view full image">` : ''}
+                        </div>
+                    ` : ''}
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function refreshCurrentView() {
+            if (currentUnit) {
+                renderUnitMembers();
+                renderUnitMeetings();
+            } else if (currentMandalam) {
+                renderUnits();
+                renderMandalamMembers();
+                renderMandalamMeetings();
+            } else {
+                renderMandalams();
+            }
+            updateMeetingsLockUI();
+        }
+
+        window.handleFilePreview = function(input, imgId) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById(imgId);
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.switchView = function(viewName) {
+            ['home', 'mandalam', 'unit'].forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden');
+            });
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.navigateTo = function(target) {
+            if(target === 'home') {
+                currentMandalam = null;
+                currentUnit = null;
+                document.getElementById('bc-mandalam').classList.add('hidden');
+                document.getElementById('bc1-sep').classList.add('hidden');
+                document.getElementById('bc-unit').classList.add('hidden');
+                document.getElementById('bc2-sep').classList.add('hidden');
+                document.getElementById('headerContextText').innerText = 'District Executive';
+                switchView('home');
+            }
+        };
+
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        };
+
+        window.alertModal = function(title, msg) {
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertMessage').innerText = msg;
+            document.getElementById('customAlertModal').classList.remove('hidden');
+        };
+    </script>
+</body>
+</html>
