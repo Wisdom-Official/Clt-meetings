@@ -42,6 +42,14 @@
         .att-btn.active-present { background-color: #10b981; color: white; border-color: #059669; }
         .att-btn.active-late { background-color: #f59e0b; color: white; border-color: #d97706; }
         .att-btn.active-leave { background-color: #ef4444; color: white; border-color: #dc2626; }
+        
+        /* Logo press feedback effect */
+        .logo-holding {
+            transform: scale(0.95);
+            opacity: 0.8;
+            filter: brightness(1.2);
+            transition: all 0.2s ease;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col pb-20 md:pb-0">
@@ -50,10 +58,10 @@
     <header class="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 shadow-sm transition-all">
         <div class="max-w-5xl mx-auto px-4 py-2.5 sm:py-3 flex items-center justify-between gap-3">
             
-            <!-- Brand Logo & Context Title -->
+            <!-- Brand Logo & Context Title (Long press on logo triggers Android APK download) -->
             <div class="flex items-center space-x-3 cursor-pointer group min-w-0" onclick="navigateTo('home')">
-                <div class="p-1 rounded-xl bg-slate-50 border border-slate-100 group-hover:border-sky-200 transition-all shrink-0">
-                    <img src="logo.png" alt="WISDOM Students Logo" class="h-8 sm:h-9 md:h-10 w-auto object-contain rounded-lg" onerror="this.onerror=null; this.src='https://placehold.co/180x50/0f172a/ffffff?text=WISDOM+students';">
+                <div id="headerLogoContainer" class="p-1 rounded-xl bg-slate-50 border border-slate-100 group-hover:border-sky-200 transition-all shrink-0 select-none relative" title="Press & Hold 1.5s to Download Android App">
+                    <img id="headerLogoImg" src="logo.png" alt="WISDOM Students Logo" class="h-8 sm:h-9 md:h-10 w-auto object-contain rounded-lg pointer-events-none" onerror="this.onerror=null; this.src='https://placehold.co/180x50/0f172a/ffffff?text=WISDOM+students';">
                 </div>
                 <div class="border-l border-slate-200 pl-2.5 sm:pl-3 truncate">
                     <h1 class="text-xs sm:text-sm font-extrabold text-slate-900 uppercase tracking-wider truncate group-hover:text-sky-600 transition-colors">Calicut North</h1>
@@ -895,10 +903,63 @@
             }
         };
 
+        // SETUP LONG PRESS DETECTOR ON HEADER LOGO FOR APP INSTALLATION
+        function setupLogoLongPressAPKInstall() {
+            const logoEl = document.getElementById('headerLogoContainer');
+            if (!logoEl) return;
+
+            let pressTimer = null;
+            let isLongPressTriggered = false;
+
+            const startPress = (e) => {
+                isLongPressTriggered = false;
+                logoEl.classList.add('logo-holding');
+                
+                pressTimer = setTimeout(() => {
+                    isLongPressTriggered = true;
+                    logoEl.classList.remove('logo-holding');
+                    
+                    // Trigger vibration feedback if supported
+                    if (navigator.vibrate) {
+                        navigator.vibrate([100, 50, 100]);
+                    }
+
+                    // Direct download trigger for Github Repo Root "app-release.apk"
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = './app-release.apk';
+                    downloadLink.download = 'app-release.apk';
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+
+                    alertModal("Downloading App", "Calicut North Android Application (app-release.apk) download has started!");
+                }, 1200); // 1.2 Seconds hold time
+            };
+
+            const cancelPress = (e) => {
+                if (pressTimer) {
+                    clearTimeout(pressTimer);
+                    pressTimer = null;
+                }
+                logoEl.classList.remove('logo-holding');
+            };
+
+            // Touch events for mobile
+            logoEl.addEventListener('touchstart', startPress, { passive: true });
+            logoEl.addEventListener('touchend', cancelPress);
+            logoEl.addEventListener('touchcancel', cancelPress);
+
+            // Mouse events for desktop
+            logoEl.addEventListener('mousedown', startPress);
+            logoEl.addEventListener('mouseup', cancelPress);
+            logoEl.addEventListener('mouseleave', cancelPress);
+        }
+
         window.onload = function() {
             requestNotificationPermissions();
             renderAnnouncementBanner();
             renderMandalams();
+            setupLogoLongPressAPKInstall();
             document.getElementById('meetingDate').value = new Date().toISOString().split('T')[0];
             updateMeetingsLockUI();
         };
