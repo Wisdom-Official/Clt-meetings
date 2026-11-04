@@ -1,0 +1,21 @@
+{
+"name": "Wisdom Students Calicut North",
+"short_name": "Clt North",
+"start_url": "index.html",
+"display": "standalone",
+"background_color": "#0f172a",
+"theme_color": "#0369a1",
+"orientation": "portrait",
+"icons": [
+{
+"src": "studentlogo.jpg",
+"sizes": "192x192",
+"type": "image/jpeg"
+},
+{
+"src": "studentlogo.jpg",
+"sizes": "512x512",
+"type": "image/jpeg"
+}
+]
+}
