@@ -1,0 +1,809 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wisdom Students Calicut North - Executive Monitoring Portal</title>
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff', 100: '#e0effe', 500: '#0284c7', 600: '#0369a1', 700: '#0c4a6e', 800: '#082f49', 900: '#0f172a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .glass-card { background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(16px); border: 1px solid rgba(226, 232, 240, 0.8); }
+        .pulse-ring { animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite; }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 0.4; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col pb-12">
+
+    <!-- SECURITY AUTHENTICATION OVERLAY -->
+    <div id="loginOverlay" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-lg flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 text-center relative overflow-hidden">
+            <div class="w-16 h-16 bg-sky-50 text-sky-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner border border-sky-100">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            
+            <span class="bg-sky-50 text-sky-700 text-[10px] font-extrabold px-3 py-1 rounded-full border border-sky-200 tracking-wider uppercase">Executive Portal</span>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 mt-2">Calicut North Portal</h2>
+            <p class="text-xs text-slate-500 mt-1 mb-6">Enter security passcode or use registered biometrics</p>
+
+            <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+                <div class="relative">
+                    <input type="password" id="accessPassword" required placeholder="Enter Portal Passcode" class="w-full px-4 py-3.5 text-center text-sm font-semibold tracking-wider border border-slate-300 rounded-2xl focus:ring-2 focus:ring-sky-500 outline-none transition-all shadow-sm">
+                </div>
+
+                <button type="submit" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 active:scale-[0.99]">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                    <span>Authenticate & Access</span>
+                </button>
+            </form>
+
+            <!-- BIOMETRIC FINGERPRINT LOGIN -->
+            <div id="biometricSection" class="mt-6 pt-6 border-t border-slate-100">
+                <button type="button" id="bioLoginBtn" onclick="handleBiometricLogin()" class="w-full py-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-bold text-xs sm:text-sm rounded-2xl transition-all flex items-center justify-center gap-2 active:scale-[0.99]">
+                    <i class="fa-solid fa-fingerprint text-lg"></i>
+                    <span id="bioBtnText">Login with Biometrics / Fingerprint</span>
+                </button>
+                <p id="bioStatusMsg" class="text-[11px] text-slate-400 mt-2.5 leading-relaxed">Login with password once to enable one-tap biometric access.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD CONTAINER -->
+    <div id="mainDashboard" class="hidden min-h-screen flex flex-col">
+        
+        <!-- TOP NAVIGATION HEADER -->
+        <header class="bg-slate-900/95 backdrop-blur-md text-white border-b border-slate-800 sticky top-0 z-30 shadow-md">
+            <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 flex items-center justify-between gap-4">
+                
+                <!-- Brand & Portal Info -->
+                <div class="flex items-center space-x-3 min-w-0">
+                    <div class="w-10 h-10 rounded-2xl bg-sky-600 flex items-center justify-center font-extrabold text-white text-lg shadow-md shrink-0">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <div class="truncate">
+                        <h1 class="text-xs sm:text-sm font-extrabold tracking-wider uppercase text-slate-100 truncate">Calicut North District</h1>
+                        <p class="text-[10px] sm:text-xs text-sky-400 font-semibold truncate">Live Executive Review Portal</p>
+                    </div>
+                </div>
+
+                <!-- Connectivity & Actions -->
+                <div class="flex items-center space-x-2 sm:space-x-3 shrink-0">
+                    <div id="syncBadge" class="flex items-center text-[10px] sm:text-xs bg-emerald-500/10 text-emerald-400 px-2.5 sm:px-3 py-1 rounded-full border border-emerald-500/20 font-semibold">
+                        <i class="fa-solid fa-cloud text-emerald-400 mr-1.5" id="syncIcon"></i>
+                        <span id="syncText">Live Cloud Synced</span>
+                    </div>
+                    
+                    <button id="pwaInstallBtn" onclick="triggerPWAInstall()" class="hidden bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-download"></i>
+                        <span class="hidden sm:inline">Install App</span>
+                    </button>
+
+                    <button onclick="logout()" class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 text-xs sm:text-sm transition-colors flex items-center gap-1.5" title="Logout">
+                        <i class="fa-solid fa-power-off text-rose-400"></i>
+                        <span class="hidden md:inline font-semibold">Logout</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- DASHBOARD BODY CONTAINER -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6 flex-1 w-full">
+
+            <!-- EVENT BROADCAST PUBLISHER WIDGET -->
+            <div class="bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                    <div>
+                        <h2 class="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-bullhorn text-sky-600"></i>
+                            <span>Broadcast Event & Announcement</span>
+                        </h2>
+                        <p class="text-xs text-slate-500">Publish high-priority event details directly to all user screens with audio notification alerts.</p>
+                    </div>
+                    <button onclick="toggleBroadcastForm()" class="bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold text-xs px-3.5 py-2 rounded-xl border border-sky-200 transition-all flex items-center gap-1.5 w-fit">
+                        <i class="fa-solid fa-plus-circle" id="broadcastToggleIcon"></i>
+                        <span id="broadcastToggleText">Create Announcement</span>
+                    </button>
+                </div>
+
+                <!-- Announcement Form -->
+                <form id="broadcastForm" onsubmit="handleBroadcastSubmit(event)" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50/70 p-4 rounded-2xl border border-slate-200/70">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Event Title *</label>
+                        <input type="text" id="announcementTitle" required placeholder="e.g. Chillanallil Executive Meet & Conference" class="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Event Date *</label>
+                        <input type="date" id="announcementDate" required class="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Location / Venue (e.g., Chillanallil) *</label>
+                        <input type="text" id="announcementLocation" required placeholder="e.g. Chillanallil Auditorium" class="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 outline-none">
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Description / Details</label>
+                        <textarea id="announcementDetails" rows="2" placeholder="Provide full details, timing, agenda..." class="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 outline-none"></textarea>
+                    </div>
+
+                    <div class="md:col-span-2 flex items-center justify-end gap-2 pt-1">
+                        <button type="button" onclick="toggleBroadcastForm()" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-200 hover:bg-slate-300 rounded-xl">Cancel</button>
+                        <button type="submit" id="broadcastBtn" class="px-5 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-xl shadow flex items-center gap-1.5">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Broadcast Event</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Active Announcement Preview -->
+                <div id="activeAnnouncementBox" class="hidden p-4 rounded-2xl bg-sky-50/80 border border-sky-200/80 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-sky-600 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">Active Event</span>
+                            <h4 id="activeAnnTitle" class="text-xs sm:text-sm font-bold text-slate-900"></h4>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3 text-xs text-slate-600">
+                            <span><i class="fa-solid fa-calendar-day text-sky-600 mr-1"></i><b id="activeAnnDate"></b></span>
+                            <span><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i><b id="activeAnnLocation"></b></span>
+                        </div>
+                        <p id="activeAnnDetails" class="text-xs text-slate-500 leading-relaxed mt-1"></p>
+                    </div>
+                    <button onclick="clearActiveAnnouncement()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold px-3 py-1.5 rounded-xl shrink-0 transition-all flex items-center gap-1">
+                        <i class="fa-solid fa-trash-can"></i>
+                        <span>Clear Event</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- FILTER & WEEKLY REVIEW HEADER BANNER -->
+            <div class="bg-gradient-to-r from-sky-900 via-slate-900 to-sky-950 text-white p-5 sm:p-6 rounded-3xl shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative overflow-hidden">
+                <div class="relative z-10 max-w-2xl">
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-sky-500/20 text-sky-300 border border-sky-400/30 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">District Monitoring Mode</span>
+                        <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Automated Firestore Sync</span>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-extrabold mt-2 text-white">District Secretariat & Unit Review</h2>
+                    <p class="text-slate-300 text-xs sm:text-sm mt-1 leading-relaxed">
+                        Track weekly meeting status across 7 Zones and all associated Units. Directly contact Zone/Unit leadership via one-tap direct call buttons.
+                    </p>
+                </div>
+
+                <!-- Time Filter Controls -->
+                <div class="bg-white/10 backdrop-blur-md p-3 sm:p-4 rounded-2xl border border-white/10 flex items-center justify-between lg:justify-end gap-3 shrink-0 relative z-10">
+                    <div class="text-left lg:text-right">
+                        <span class="block text-[10px] text-slate-300 uppercase font-extrabold tracking-wider">Review Cycle Filter</span>
+                        <span id="weekFilterText" class="text-xs font-bold text-sky-300">Current Week (Last 7 Days)</span>
+                    </div>
+                    
+                    <select id="timeFilterSelect" onchange="handleTimeFilterChange(this.value)" class="bg-slate-900 text-white text-xs font-semibold px-3 py-2 rounded-xl border border-slate-700 outline-none focus:ring-2 focus:ring-sky-400 cursor-pointer shadow-sm">
+                        <option value="7">Current Week (7 Days)</option>
+                        <option value="14">Last 2 Weeks (14 Days)</option>
+                        <option value="30">Current Month (30 Days)</option>
+                        <option value="all">All-Time History</option>
+                    </select>
+                </div>
+
+                <div class="absolute -right-8 -bottom-12 opacity-10 text-9xl pointer-events-none">
+                    <i class="fa-solid fa-list-check"></i>
+                </div>
+            </div>
+
+            <!-- OVERVIEW METRICS / PRESSURE STAT CARDS -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <!-- Card 1: Unit Meetings Completed -->
+                <div class="glass-card p-5 rounded-3xl shadow-sm border-l-4 border-l-emerald-500 flex justify-between items-start hover:shadow-md transition-all">
+                    <div>
+                        <span class="text-xs font-bold uppercase text-slate-500 tracking-wider">Units Meeting Held</span>
+                        <h3 class="text-3xl font-extrabold text-slate-900 mt-1" id="statUnitDone">0</h3>
+                        <p class="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center gap-1" id="statUnitDonePct">
+                            <i class="fa-solid fa-circle-check"></i> 0% Completed
+                        </p>
+                    </div>
+                    <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-inner border border-emerald-100">
+                        <i class="fa-solid fa-check-double"></i>
+                    </div>
+                </div>
+
+                <!-- Card 2: Unit Meetings Pending (Pressure Point) -->
+                <div class="glass-card p-5 rounded-3xl shadow-sm border-l-4 border-l-rose-500 flex justify-between items-start hover:shadow-md transition-all">
+                    <div>
+                        <span class="text-xs font-bold uppercase text-slate-500 tracking-wider">Units Meeting Pending</span>
+                        <h3 class="text-3xl font-extrabold text-rose-600 mt-1" id="statUnitPending">0</h3>
+                        <p class="text-[11px] text-rose-600 font-semibold mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-phone-volume"></i> Direct Follow-up Required
+                        </p>
+                    </div>
+                    <div class="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl pulse-ring shadow-inner border border-rose-100">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                </div>
+
+                <!-- Card 3: Zone Secretariat Meetings Completed -->
+                <div class="glass-card p-5 rounded-3xl shadow-sm border-l-4 border-l-sky-500 flex justify-between items-start hover:shadow-md transition-all">
+                    <div>
+                        <span class="text-xs font-bold uppercase text-slate-500 tracking-wider">Zone Secretariat Held</span>
+                        <h3 class="text-3xl font-extrabold text-slate-900 mt-1" id="statZoneDone">0</h3>
+                        <p class="text-[11px] text-sky-600 font-semibold mt-1 flex items-center gap-1" id="statZoneDonePct">
+                            <i class="fa-solid fa-building"></i> 0% Completed
+                        </p>
+                    </div>
+                    <div class="w-11 h-11 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center text-xl shadow-inner border border-sky-100">
+                        <i class="fa-solid fa-building-flag"></i>
+                    </div>
+                </div>
+
+                <!-- Card 4: Zone Secretariat Meetings Pending -->
+                <div class="glass-card p-5 rounded-3xl shadow-sm border-l-4 border-l-amber-500 flex justify-between items-start hover:shadow-md transition-all">
+                    <div>
+                        <span class="text-xs font-bold uppercase text-slate-500 tracking-wider">Zone Secretariat Pending</span>
+                        <h3 class="text-3xl font-extrabold text-amber-600 mt-1" id="statZonePending">0</h3>
+                        <p class="text-[11px] text-amber-600 font-semibold mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-hourglass-half"></i> Follow-up Required
+                        </p>
+                    </div>
+                    <div class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shadow-inner border border-amber-100">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ZONE MANAGEMENT & DIRECT CALL ACTION PORTAL -->
+            <div class="space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
+                    <div>
+                        <h2 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-phone-volume text-sky-600"></i>
+                            <span>Zone Leadership & Unit Direct Call Follow-up Portal</span>
+                        </h2>
+                        <p class="text-xs text-slate-500">Tap phone icons to directly contact Zone/Unit leadership to inquire why meetings were not held</p>
+                    </div>
+                </div>
+
+                <!-- ZONE GRID CONTAINER -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="zoneGridContainer">
+                    <!-- Dynamic Zone Cards from Firebase Sync -->
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- CUSTOM ALERT DIALOG -->
+    <div id="customAlert" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center border border-slate-100">
+            <h3 class="text-base font-bold text-slate-900" id="alertTitle">Notice</h3>
+            <p class="text-xs text-slate-600 mt-2 leading-relaxed" id="alertMsg"></p>
+            <button onclick="closeModal('customAlert')" class="mt-5 w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow transition-all">OK</button>
+        </div>
+    </div>
+
+    <!-- FIREBASE MODULE & APPLICATION LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // MASTER PASSWORD
+        const MASTER_PASSWORD = "best@_create";
+
+        // FIREBASE CONFIGURATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyBhy9C1LoM-VBTcEGJVyZ5SGpbUg6fBdB8",
+            authDomain: "meeting-49a0e.firebaseapp.com",
+            projectId: "meeting-49a0e",
+            storageBucket: "meeting-49a0e.firebasestorage.app",
+            messagingSenderId: "716083133615",
+            appId: "1:716083133615:web:86b1f9b28d31c81b25a85a"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // DISTRICT HIERARCHY STRUCTURE
+        const DISTRICT_STRUCTURE = [
+            { name: "BALUSSERY", units: ["PUTHOOR VATTAM", "BALUSSERI TOWN", "BALUSSERI", "ARAPPEEDLKA", "VATTOLI BAZAR", "NANMINDA 14", "POONATH", "KOORACHUND"] },
+            { name: "NADAPURAM", units: ["THUNERI", "NADAPURAM", "VANIMEL", "KALLAACHI", "CHEEKKONNU", "THANNEER PANTHAL"] },
+            { name: "POONOOR", units: ["THALAYAD", "THACHAMPOYIL", "VALLIYOTH", "EKAROOL", "POONOOR", "KEDAVOOR", "KOLIKKAL"] },
+            { name: "KOYILANDY", units: ["KATTIL PEEDIKA", "KAPPAD", "CHANGOOTUKAVU", "KOYILANDY", "KOLLAM", "MUDADI", "ARIKKULAM", "KAVUMVATTAM"] },
+            { name: "PERAMBRA", units: ["PANTHIRIKKARA", "PERAMBRA", "ERAVTTOOR", "KADIYANGAD PALAM", "NOCHAD", "MEPPAYYUR", "EAST PERAMBRA"] },
+            { name: "PAYYOLI", units: ["PAYYOLI", "THURAYUR", "THIKKODI", "NANDI", "KEEZHUR"] },
+            { name: "VATAKARA", units: ["VATAKARA", "MANIYOOR", "ORKATTERI", "AZHIYUR"] }
+        ];
+
+        // Stores
+        let membersStore = JSON.parse(localStorage.getItem('ws_members_store')) || {};
+        let meetingsStore = JSON.parse(localStorage.getItem('ws_meetings_store')) || {};
+        let activeAnnouncement = JSON.parse(localStorage.getItem('ws_active_announcement')) || null;
+        let timeFilterDays = 7;
+
+        let deferredPrompt = null;
+
+        // Register PWA Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW reg error:', err));
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const btn = document.getElementById('pwaInstallBtn');
+            if (btn) btn.classList.remove('hidden');
+        });
+
+        window.triggerPWAInstall = function() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+            }
+        };
+
+        // INITIALIZATION
+        window.addEventListener('DOMContentLoaded', () => {
+            checkExistingAuth();
+            signInAnonymously(auth).then(() => {
+                listenCloudSync();
+            }).catch(e => {
+                console.log("Firebase Auth offline mode:", e);
+                renderDashboard();
+            });
+            document.getElementById('announcementDate').value = new Date().toISOString().split('T')[0];
+        });
+
+        function checkExistingAuth() {
+            const isAuth = localStorage.getItem('ws_is_authenticated');
+            if (isAuth === 'true') {
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('mainDashboard').classList.remove('hidden');
+                renderDashboard();
+            }
+
+            if (!window.PublicKeyCredential) {
+                document.getElementById('bioStatusMsg').innerText = "Biometric authentication is not supported on this device/browser.";
+            }
+        }
+
+        // PASSWORD LOGIN HANDLER
+        window.handleLoginSubmit = function(e) {
+            e.preventDefault();
+            const pass = document.getElementById('accessPassword').value.trim();
+
+            if (pass === MASTER_PASSWORD) {
+                localStorage.setItem('ws_is_authenticated', 'true');
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('mainDashboard').classList.remove('hidden');
+                renderDashboard();
+                registerBiometricPrompt();
+            } else {
+                showAlert("Access Denied", "Incorrect password! Please enter the valid security passcode.");
+            }
+        };
+
+        // BIOMETRIC AUTHENTICATION HANDLERS
+        async function registerBiometricPrompt() {
+            if (window.PublicKeyCredential && !localStorage.getItem('ws_bio_registered')) {
+                try {
+                    const challenge = new Uint8Array(32);
+                    window.crypto.getRandomValues(challenge);
+
+                    const createCredentialOptions = {
+                        publicKey: {
+                            challenge: challenge,
+                            rp: { name: "Wisdom Students Portal" },
+                            user: {
+                                id: Uint8Array.from("ws_user_id", c => c.charCodeAt(0)),
+                                name: "district_executive",
+                                displayName: "District Executive"
+                            },
+                            pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+                            authenticatorSelection: { authenticatorAttachment: "platform" },
+                            timeout: 60000
+                        }
+                    };
+
+                    const credential = await navigator.credentials.create(createCredentialOptions);
+                    if (credential) {
+                        localStorage.setItem('ws_bio_registered', 'true');
+                        document.getElementById('bioBtnText').innerText = "Biometrics Registered (Tap to Login)";
+                    }
+                } catch (e) {
+                    console.log("Biometric setup skipped/cancelled", e);
+                }
+            }
+        }
+
+        window.handleBiometricLogin = async function() {
+            if (!localStorage.getItem('ws_bio_registered')) {
+                showAlert("Notice", "Please log in with the passcode once to register biometrics.");
+                return;
+            }
+
+            try {
+                const challenge = new Uint8Array(32);
+                window.crypto.getRandomValues(challenge);
+
+                const assertion = await navigator.credentials.get({
+                    publicKey: { challenge: challenge, timeout: 60000 }
+                });
+
+                if (assertion) {
+                    localStorage.setItem('ws_is_authenticated', 'true');
+                    document.getElementById('loginOverlay').classList.add('hidden');
+                    document.getElementById('mainDashboard').classList.remove('hidden');
+                    renderDashboard();
+                }
+            } catch (err) {
+                showAlert("Biometric Login Failed", "Please log in using your passcode.");
+            }
+        };
+
+        window.logout = function() {
+            localStorage.removeItem('ws_is_authenticated');
+            location.reload();
+        };
+
+        // FIRESTORE REALTIME SYNC
+        function listenCloudSync() {
+            try {
+                const docRef = doc(db, 'artifacts', 'meeting-49a0e', 'public', 'data', 'calicut_north', 'store');
+                onSnapshot(docRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const cloudData = docSnap.data();
+                        if (cloudData.membersStore) membersStore = cloudData.membersStore;
+                        if (cloudData.meetingsStore) meetingsStore = cloudData.meetingsStore;
+                        if (cloudData.activeAnnouncement !== undefined) activeAnnouncement = cloudData.activeAnnouncement;
+                        
+                        localStorage.setItem('ws_members_store', JSON.stringify(membersStore));
+                        localStorage.setItem('ws_meetings_store', JSON.stringify(meetingsStore));
+                        localStorage.setItem('ws_active_announcement', JSON.stringify(activeAnnouncement));
+                        
+                        document.getElementById('syncText').innerText = "Live Cloud Synced";
+                        renderDashboard();
+                    }
+                }, (error) => console.log("Firestore read error:", error));
+            } catch (e) {
+                console.log("Firestore offline read mode");
+            }
+        }
+
+        async function syncToCloud() {
+            if (!auth.currentUser) return;
+            try {
+                const docRef = doc(db, 'artifacts', 'meeting-49a0e', 'public', 'data', 'calicut_north', 'store');
+                await setDoc(docRef, {
+                    membersStore,
+                    meetingsStore,
+                    activeAnnouncement,
+                    lastUpdated: new Date().toISOString()
+                }, { merge: true });
+            } catch (e) {
+                console.error("Cloud sync pending...", e);
+            }
+        }
+
+        // ANNOUNCEMENT BROADCAST MANAGEMENT
+        window.toggleBroadcastForm = function() {
+            const form = document.getElementById('broadcastForm');
+            const isHidden = form.classList.contains('hidden');
+            if (isHidden) {
+                form.classList.remove('hidden');
+                document.getElementById('broadcastToggleIcon').className = 'fa-solid fa-minus-circle';
+                document.getElementById('broadcastToggleText').innerText = 'Close Form';
+            } else {
+                form.classList.add('hidden');
+                document.getElementById('broadcastToggleIcon').className = 'fa-solid fa-plus-circle';
+                document.getElementById('broadcastToggleText').innerText = 'Create Announcement';
+            }
+        };
+
+        window.handleBroadcastSubmit = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('broadcastBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Broadcasting...`;
+
+            const title = document.getElementById('announcementTitle').value;
+            const date = document.getElementById('announcementDate').value;
+            const location = document.getElementById('announcementLocation').value;
+            const details = document.getElementById('announcementDetails').value;
+
+            activeAnnouncement = {
+                title,
+                date,
+                location,
+                details,
+                timestamp: new Date().toISOString()
+            };
+
+            localStorage.setItem('ws_active_announcement', JSON.stringify(activeAnnouncement));
+            await syncToCloud();
+
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>Broadcast Event</span>`;
+
+            toggleBroadcastForm();
+            showAlert("Event Broadcasted", "Announcement pushed to all users with alert sound notification!");
+            renderDashboard();
+        };
+
+        window.clearActiveAnnouncement = async function() {
+            activeAnnouncement = null;
+            localStorage.removeItem('ws_active_announcement');
+            await syncToCloud();
+            renderDashboard();
+            showAlert("Cleared", "Announcement has been removed.");
+        };
+
+        function renderAnnouncementUI() {
+            const box = document.getElementById('activeAnnouncementBox');
+            if (!box) return;
+
+            if (activeAnnouncement) {
+                document.getElementById('activeAnnTitle').innerText = activeAnnouncement.title;
+                document.getElementById('activeAnnDate').innerText = activeAnnouncement.date;
+                document.getElementById('activeAnnLocation').innerText = activeAnnouncement.location;
+                document.getElementById('activeAnnDetails').innerText = activeAnnouncement.details || 'No additional details provided.';
+                box.classList.remove('hidden');
+            } else {
+                box.classList.add('hidden');
+            }
+        }
+
+        window.handleTimeFilterChange = function(val) {
+            timeFilterDays = val === 'all' ? 'all' : parseInt(val);
+            const labelMap = {
+                '7': 'Current Week (Last 7 Days)',
+                '14': 'Last 2 Weeks (14 Days)',
+                '30': 'Current Month (30 Days)',
+                'all': 'All-Time History'
+            };
+            document.getElementById('weekFilterText').innerText = labelMap[val] || 'Current Week';
+            renderDashboard();
+        };
+
+        function isWithinTimeFilter(dateStr) {
+            if (timeFilterDays === 'all') return true;
+            if (!dateStr) return false;
+
+            const meetingDate = new Date(dateStr);
+            const now = new Date();
+            const diffTime = Math.abs(now - meetingDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            return diffDays <= timeFilterDays;
+        }
+
+        // MAIN DASHBOARD RENDERER
+        function renderDashboard() {
+            renderAnnouncementUI();
+
+            let totalUnits = 0;
+            let doneUnits = 0;
+            let totalZones = DISTRICT_STRUCTURE.length;
+            let doneZones = 0;
+
+            DISTRICT_STRUCTURE.forEach(z => {
+                const zKey = `${z.name}_MANDALAM`;
+                const zMeetings = meetingsStore[zKey] || [];
+                const zHeldThisPeriod = zMeetings.some(m => isWithinTimeFilter(m.date));
+                if (zHeldThisPeriod) doneZones++;
+
+                z.units.forEach(u => {
+                    totalUnits++;
+                    const uKey = `${z.name}_${u}`;
+                    const uMeetings = meetingsStore[uKey] || [];
+                    const uHeldThisPeriod = uMeetings.some(m => isWithinTimeFilter(m.date));
+                    if (uHeldThisPeriod) doneUnits++;
+                });
+            });
+
+            const pendingUnits = totalUnits - doneUnits;
+            const pendingZones = totalZones - doneZones;
+
+            document.getElementById('statUnitDone').innerText = doneUnits;
+            document.getElementById('statUnitDonePct').innerHTML = `<i class="fa-solid fa-circle-check"></i> ${Math.round((doneUnits / (totalUnits || 1)) * 100)}% (${totalUnits} Total)`;
+            
+            document.getElementById('statUnitPending').innerText = pendingUnits;
+            
+            document.getElementById('statZoneDone').innerText = doneZones;
+            document.getElementById('statZoneDonePct').innerHTML = `<i class="fa-solid fa-building"></i> ${Math.round((doneZones / (totalZones || 1)) * 100)}% (${totalZones} Total)`;
+            
+            document.getElementById('statZonePending').innerText = pendingZones;
+
+            const grid = document.getElementById('zoneGridContainer');
+            grid.innerHTML = '';
+
+            DISTRICT_STRUCTURE.forEach(zone => {
+                const zKey = `${zone.name}_MANDALAM`;
+                const zMembers = membersStore[zKey] || [];
+                const zMeetings = meetingsStore[zKey] || [];
+                const zHeldThisPeriod = zMeetings.some(m => isWithinTimeFilter(m.date));
+                const latestZMeeting = zMeetings[0];
+
+                let zoneDoneUnitsCount = 0;
+                zone.units.forEach(u => {
+                    const uKey = `${zone.name}_${u}`;
+                    const uMeetings = meetingsStore[uKey] || [];
+                    if (uMeetings.some(m => isWithinTimeFilter(m.date))) zoneDoneUnitsCount++;
+                });
+                const zonePendingUnitsCount = zone.units.length - zoneDoneUnitsCount;
+
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80 space-y-4 hover:shadow-md transition-all flex flex-col justify-between";
+
+                card.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3.5">
+                            <div>
+                                <span class="text-[10px] font-extrabold text-sky-700 bg-sky-50 border border-sky-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">Zone Secretariat</span>
+                                <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mt-0.5">${zone.name}</h3>
+                            </div>
+
+                            <div class="px-3 py-1.5 rounded-2xl text-xs font-bold flex items-center gap-1.5 shadow-sm ${
+                                zHeldThisPeriod 
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                                : 'bg-rose-50 text-rose-700 border border-rose-200'
+                            }">
+                                <i class="fa-solid ${zHeldThisPeriod ? 'fa-circle-check text-emerald-600' : 'fa-hourglass-start text-rose-600'}"></i>
+                                <span>${zHeldThisPeriod ? 'Secretariat Held' : 'Secretariat Pending'}</span>
+                            </div>
+                        </div>
+
+                        ${latestZMeeting ? `
+                            <div class="text-[11px] bg-slate-50 p-2.5 rounded-2xl border border-slate-200/60 flex items-center justify-between">
+                                <span class="text-slate-600 font-semibold"><i class="fa-solid fa-calendar-day text-sky-600 mr-1.5"></i> Last Meeting: <b>${latestZMeeting.date}</b></span>
+                                <span class="text-slate-400 font-medium truncate max-w-[150px]"><i class="fa-solid fa-location-dot mr-1 text-rose-400"></i>${latestZMeeting.place}</span>
+                            </div>
+                        ` : ''}
+
+                        <div>
+                            <span class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block mb-2">Zone Leadership Contacts:</span>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                ${renderLeaderCard(zMembers, "President")}
+                                ${renderLeaderCard(zMembers, "Secretary")}
+                                ${renderLeaderCard(zMembers, "Vice President")}
+                                ${renderLeaderCard(zMembers, "Joint Secretary")}
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-100">
+                            <div class="flex items-center justify-between mb-2.5">
+                                <span class="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Unit Meetings Overview</span>
+                                <span class="text-xs font-extrabold ${zonePendingUnitsCount > 0 ? 'text-rose-600 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-100' : 'text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100'}">
+                                    ${zoneDoneUnitsCount}/${zone.units.length} Held
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                ${zone.units.map(u => {
+                                    const uKey = `${zone.name}_${u}`;
+                                    const uMembers = membersStore[uKey] || [];
+                                    const uMeetings = meetingsStore[uKey] || [];
+                                    const uHeldThisPeriod = uMeetings.some(m => isWithinTimeFilter(m.date));
+                                    const leaderPhone = getFirstLeaderPhone(uMembers);
+
+                                    return `
+                                        <div class="p-2.5 rounded-2xl border flex items-center justify-between transition-all ${
+                                            uHeldThisPeriod 
+                                            ? 'bg-emerald-50/40 border-emerald-200/80 text-emerald-950' 
+                                            : 'bg-rose-50/40 border-rose-200/80 text-rose-950'
+                                        }">
+                                            <div class="min-w-0 pr-2">
+                                                <div class="flex items-center space-x-1.5">
+                                                    <i class="fa-solid ${uHeldThisPeriod ? 'fa-check-circle text-emerald-600' : 'fa-clock text-rose-500'} text-xs"></i>
+                                                    <span class="text-xs font-bold truncate">${u}</span>
+                                                </div>
+                                                <span class="text-[10px] text-slate-400 block mt-0.5">${uMeetings.length} Meeting Logs</span>
+                                            </div>
+
+                                            <div class="flex items-center gap-1.5 shrink-0">
+                                                ${leaderPhone ? `
+                                                    <a href="tel:${leaderPhone}" class="w-7 h-7 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white flex items-center justify-center text-[10px] shadow-sm transition-all" title="Call Unit Leader (${leaderPhone})">
+                                                        <i class="fa-solid fa-phone"></i>
+                                                    </a>
+                                                ` : ''}
+                                                <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase ${
+                                                    uHeldThisPeriod ? 'bg-emerald-200/70 text-emerald-800' : 'bg-rose-200/70 text-rose-800'
+                                                }">
+                                                    ${uHeldThisPeriod ? 'Held' : 'Pending'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        function renderLeaderCard(membersList, roleKey) {
+            const leader = membersList.find(m => m.role && m.role.toLowerCase() === roleKey.toLowerCase());
+
+            if (leader && leader.phone) {
+                return `
+                    <a href="tel:${leader.phone}" class="p-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 rounded-2xl flex items-center justify-between group transition-all shadow-sm">
+                        <div class="min-w-0 pr-2">
+                            <span class="text-[9px] font-extrabold text-sky-600 uppercase block leading-tight tracking-wider">${roleKey}</span>
+                            <span class="text-xs font-extrabold text-slate-800 truncate block mt-0.5">${leader.name}</span>
+                            <span class="text-[10px] text-slate-400 font-medium block">${leader.phone}</span>
+                        </div>
+                        <div class="w-8 h-8 rounded-xl bg-emerald-500 group-hover:bg-emerald-600 group-active:scale-95 text-white flex items-center justify-center text-xs shadow shrink-0 transition-all" title="Call directly">
+                            <i class="fa-solid fa-phone"></i>
+                        </div>
+                    </a>
+                `;
+            } else if (leader) {
+                return `
+                    <div class="p-2.5 bg-slate-50 border border-slate-200/70 rounded-2xl flex items-center justify-between">
+                        <div class="min-w-0">
+                            <span class="text-[9px] font-extrabold text-sky-600 uppercase block leading-tight tracking-wider">${roleKey}</span>
+                            <span class="text-xs font-extrabold text-slate-800 truncate block mt-0.5">${leader.name}</span>
+                            <span class="text-[10px] text-slate-400 font-medium block">No Phone Number</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="p-2.5 bg-slate-50/50 border border-dashed border-slate-200/80 rounded-2xl text-slate-400">
+                        <span class="text-[9px] font-extrabold uppercase block tracking-wider">${roleKey}</span>
+                        <span class="text-xs font-medium text-slate-400">Not Assigned</span>
+                    </div>
+                `;
+            }
+        }
+
+        function getFirstLeaderPhone(membersList) {
+            const withPhone = membersList.find(m => m.phone && m.phone.trim() !== '');
+            return withPhone ? withPhone.phone : null;
+        }
+
+        window.closeModal = function(id) {
+            document.getElementById(id).classList.add('hidden');
+        };
+
+        window.showAlert = function(title, msg) {
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertMsg').innerText = msg;
+            document.getElementById('customAlert').classList.remove('hidden');
+        };
+    </script>
+</body>
+</html>
